@@ -4,17 +4,19 @@ from abc import ABC, abstractmethod
 class IRunRepository(ABC):
     
     @abstractmethod
-    def save(self, run: ModelRun) -> None:
+    def save(self, run: ModelRun) -> ModelRun:
         pass
 
     @abstractmethod
     def get(self, run_id: str) -> ModelRun:
         pass
 
+
+
 class IParametersRepository(ABC):
 
     @abstractmethod
-    def save(self, parameter_set: ParameterSet) -> None:
+    def save(self, parameter_set: ParameterSet) -> ParameterSet:
         pass
 
     @abstractmethod

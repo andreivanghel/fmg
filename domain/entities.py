@@ -1,15 +1,17 @@
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from typing import Any
 from datetime import datetime, timezone
 from domain.enums import RunStatus, CheckType, CheckOutcome, CheckSeverity
-from domain.exceptions import InvalidStateTransitionError
+from domain.exceptions import InvalidStateTransitionError, EmptyParameterSet
 
 ### --> manage what happens after a run is finished... 
 ###     for each method that performs some action on via RunRepository...!
 
 @dataclass(frozen=True)
 class ModelVersion:
-    model_id: str
+    version_id: int | None
+    model_id: int
     version: str
     code_version: str
     approved: bool
@@ -18,14 +20,15 @@ class ModelVersion:
     @classmethod
     def create(
         cls, 
-        model_id: str, 
-        version: str, 
+        model_id: int, 
+        version: str,
         code_version: str
-    ):
+    ) -> ModelVersion:
         """
         Used to create a new model version.
         """
         return cls(
+            version_id = None,
             model_id = model_id,
             version = version,
             code_version = code_version,
@@ -35,17 +38,19 @@ class ModelVersion:
     
     @classmethod
     def reconstitute(
-        cls,
-        model_id: str,
-        version: str,
-        code_version: str,
-        approved: bool,
-        created_at: datetime
-    ):
+            cls,
+            version_id: int,
+            model_id: int,
+            version: str,
+            code_version: str,
+            approved: bool,
+            created_at: datetime
+    ) -> ModelVersion:
         """
         Used by the repository to reconstitute from DB
         """
         return cls(
+            version_id = version_id,
             model_id = model_id,
             version = version,
             code_version = code_version,
@@ -53,20 +58,93 @@ class ModelVersion:
             created_at = created_at
         )
     
+    def approve(self) -> ModelVersion:
+        """
+        Evolves the model version to approved state.
+        """
 
-### this class cannot be frozen (unless reimplemented in some other form)
-### when creating a new parameter version we don't know its number
-### when writing to DB we only need (as inputs to the repository) model_id and parameters set (dict)
-### we don't even need an instance of this class for this very simple task!!!
-### ---> we can consider this class as a read-only object coming from the DB. <---
-### this is definitely not a clean way to proceed though
-@dataclass
+        if self.approved:
+            raise InvalidStateTransitionError(
+                f"The model version {self.version} for model {self.model_id} is already approved."
+            )
+        
+        return replace(
+            self,
+            approved = True
+        )
+
+
+
+@dataclass(frozen=True)
 class ParameterSet:
-    model_id: str
-    parameter_version: str | None
+    parameter_version_id: int | None
+    model_id: int
+    parameter_version: str
     parameter_set: dict
     approved: bool
     created_at: datetime
+
+    @classmethod
+    def create(
+            cls,
+            model_id: int,
+            parameter_version: str,
+            parameter_set: dict
+    ) -> ParameterSet:
+        """
+        Used to create a new parameter set.
+        """
+        if not parameter_set:
+            raise EmptyParameterSet(
+                "parameter_set cannot be empty."
+            )
+        
+        return cls(
+            parameter_version_id = None,
+            model_id = model_id,
+            parameter_version = parameter_version,
+            parameter_set = parameter_set,
+            approved = False,
+            created_at = datetime.now(timezone.utc)
+        )
+    
+    @classmethod
+    def reconstitute(
+            cls,
+            parameter_version_id: int,
+            model_id: int,
+            parameter_version: str,
+            parameter_set: dict,
+            approved: bool,
+            created_at: datetime
+    ) -> ParameterSet:
+        """
+        Used by the repository to reconstitute from DB
+        """
+        return cls(
+            parameter_version_id = parameter_version_id,
+            model_id = model_id,
+            parameter_version = parameter_version,
+            parameter_set = parameter_set,
+            approved = approved,
+            created_at = created_at
+        )
+    
+    def approve(self) -> ParameterSet:
+        """
+        Evolves the parameter set to approved state.
+        """
+
+        if self.approved:
+            raise InvalidStateTransitionError(
+                f"The parameter version {self.parameter_version} for model {self.model_id} is already approved."
+            )
+        
+        return replace(
+            self,
+            approved = True
+        )
+
 
 
 @dataclass(frozen=True)
@@ -76,36 +154,37 @@ class CheckResult:
     check_type: CheckType
     check_severity: CheckSeverity
     message: str
-    details: dict
+    details: dict[str, Any]
     started_at: datetime
     completed_at: datetime
 
 
+
 @dataclass(frozen=True)
 class ModelRun:
-    id: str | None
-    model_id: str
-    model_version: str
-    parameters_version: str
+    run_id: int | None
+    model_id: int
+    model_version_id: int
+    parameter_version_id: int
     status: RunStatus
     created_at: datetime
     completed_at: datetime | None = None
-    outputs: dict[str, any] | None = None
+    outputs: dict[str, Any] | None = None
     check_results: list[CheckResult] | None = None
     error_message: str | None = None
 
     @classmethod
     def create(
             cls, 
-            model_id: str, 
-            model_version: str,
-            parameters_version: str
+            model_id: int, 
+            model_version_id: int,
+            parameter_version_id: int
     ) -> ModelRun:
         return cls(
-            id = None,
+            run_id = None,
             model_id = model_id,
-            model_version = model_version,
-            parameters_version = parameters_version,
+            model_version_id = model_version_id,
+            parameter_version_id = parameter_version_id,
             status = RunStatus.PENDING,
             created_at = datetime.now(timezone.utc),
             completed_at = None,
@@ -116,18 +195,20 @@ class ModelRun:
     
     @classmethod
     def reconstitute(
-        cls,
-        **kwargs
+            cls,
+            **kwargs
     ) -> ModelRun:
         return cls(
             **kwargs
         )
     
-    def apply_checks(self, check_results: list[CheckResult]) -> ModelRun:
+    def apply_checks(
+            self, 
+            check_results: list[CheckResult]
+    ) -> ModelRun:
         """
         Sets the check results and determines the final state of the run, returning a new instance of the class.
         """
-        self.check_results = check_results
 
         has_critical_failures = any(
             c.outcome == CheckOutcome.FAILED and c.check_severity == CheckSeverity.ERROR
@@ -135,38 +216,98 @@ class ModelRun:
         )
 
         if has_critical_failures:
-            self.mark_as_checks_failed(check_results)
+            next_status = RunStatus.CHECKS_FAILED
         else:
-            self.mark_as_completed(check_results)
-    
-    def mark_as_running(self) -> None:
-        self.status = RunStatus.RUNNING
+            next_status = RunStatus.COMPLETED
 
-    def mark_as_outputs_generated(self, outputs: dict) -> None:
-        self.status = RunStatus.OUTPUTS_GENERATED
-        self.outputs = outputs
-        
-    def mark_as_completed(self, check_results: list[CheckResult]) -> None:
-        allowed_states = [RunStatus.CHECKS_ERROR, RunStatus.OUTPUTS_GENERATED]
+        allowed_states = [RunStatus.OUTPUTS_GENERATED]
         if self.status not in allowed_states:
             raise InvalidStateTransitionError(
-                f"Model run cannot transition from state {self.status} to state {RunStatus.COMPLETED}, "
+                f"Model run cannot transition from state {self.status} to state {next_status}, "
+                f"must be {allowed_states}."
+            )
+
+        return replace(
+            self,
+            check_results = check_results,
+            status = next_status,
+            completed_at = datetime.now(timezone.utc)
+        )
+    
+    def apply_outputs(
+            self, 
+            outputs: dict[str, Any]
+    ) -> ModelRun:
+        
+        next_state = RunStatus.OUTPUTS_GENERATED
+        allowed_states = [RunStatus.RUNNING]
+
+        if self.status not in allowed_states:
+            raise InvalidStateTransitionError(
+                f"Model run cannot transition from state {self.status} to state {next_state}, "
+                f"must be {allowed_states}."
+            )
+
+        return replace(
+            self,
+            status = next_state,
+            outputs = outputs
+        )
+    
+    def mark_as_running(self) -> ModelRun:
+
+        next_state = RunStatus.RUNNING
+        allowed_states = [RunStatus.PENDING]
+
+        if self.status not in allowed_states:
+            raise InvalidStateTransitionError(
+                f"Model run cannot transition from state {self.status} to state {next_state}, "
                 f"must be {allowed_states}."
             )
         
-        self.status = RunStatus.COMPLETED
-        self.check_results = check_results
-        self.completed_at = datetime.now(timezone.utc)
+        return replace(
+            self,
+            status = next_state
+        )
+        
+    def mark_as_checks_error(
+            self, 
+            error: str
+    ) -> ModelRun:
 
-    def mark_as_checks_failed(self, check_results: list[CheckResult]) -> None:
-        self.status = RunStatus.CHECKS_FAILED
-        self.check_results = check_results
+        next_state = RunStatus.CHECKS_ERROR
+        allowed_states = [RunStatus.OUTPUTS_GENERATED]
 
-    def mark_as_checks_error(self, error: str) -> None:
-        self.status = RunStatus.CHECKS_ERROR
-        self.error_message = error
+        if self.status not in allowed_states:
+            raise InvalidStateTransitionError(
+                f"Model run cannot transition from state {self.status} to state {next_state}, "
+                f"must be {allowed_states}."
+            )
+        
+        return replace(
+            self,
+            status = RunStatus.CHECKS_ERROR,
+            error_message = error,
+            completed_at = datetime.now(timezone.utc)
+        )
 
-    def mark_as_failed(self, error: str) -> None:
-        self.status = RunStatus.FAILED
-        self.error_message = error
-    
+    def mark_as_failed(
+            self, 
+            error: str
+    ) -> ModelRun:
+
+        next_state = RunStatus.FAILED
+        allowed_states = [RunStatus.RUNNING]
+
+        if self.status not in allowed_states:
+            raise InvalidStateTransitionError(
+                f"Model run cannot transition from state {self.status} to state {next_state}, "
+                f"must be {allowed_states}."
+            )
+        
+        return replace(
+            self,
+            status = next_state,
+            error_message = error,
+            completed_at = datetime.now(timezone.utc)
+        )

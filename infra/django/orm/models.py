@@ -4,7 +4,7 @@ from domain.enums import RunStatus, EventType, EventRelevance
 class FinancialModelORM(models.Model):
     model_id = models.AutoField(primary_key = True)
 
-    model_name = models.CharField(max_length = 200)
+    model_name = models.CharField(max_length = 200, unique = True)
 
     description = models.TextField(blank=True)
 
@@ -15,7 +15,11 @@ class FinancialModelORM(models.Model):
     class Meta:
         db_table = "financial_models"
 
+
+
 class ModelVersionORM(models.Model):
+    version_id = models.AutoField(primary_key = True)
+
     model_id = models.ForeignKey(
         FinancialModelORM,
         on_delete = models.PROTECT,
@@ -23,11 +27,11 @@ class ModelVersionORM(models.Model):
         related_name = "versions"
     )
 
-    model_version = models.CharField(max_length = 50)
+    version = models.CharField(max_length = 50)
+
+    code_version = models.CharField(max_length = 50, unique = True)
 
     approved = models.BooleanField(default = False)
-
-    code_version = models.CharField(max_length = 50)
 
     created_at = models.DateTimeField()
 
@@ -35,12 +39,16 @@ class ModelVersionORM(models.Model):
         db_table = "model_versions"
         constraints = [
             models.UniqueConstraint(
-                fields=['model_id', 'model_version'], 
+                fields=['model_id', 'version'], 
                 name='unique_model_version'
             )
         ]
 
+
+
 class ParameterVersionORM(models.Model):
+    parameter_version_id = models.AutoField(primary_key = True)
+
     model_id = models.ForeignKey(
         FinancialModelORM,
         on_delete = models.PROTECT,
@@ -48,16 +56,24 @@ class ParameterVersionORM(models.Model):
         related_name = "parameter_sets"
     )
 
-    parameter_version = models.AutoField(primary_key = True)
-
-    approved = models.BooleanField(default = False)
+    parameter_version = models.CharField(max_length = 50)
 
     parameter_set = models.JSONField(default = dict)
+
+    approved = models.BooleanField(default = False)
 
     created_at = models.DateTimeField()
 
     class Meta:
         db_table = "model_parameters"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['model_id', 'parameter_version'], 
+                name='unique_parameter_version'
+            )
+        ]
+
+
 
 class ModelRunORM(models.Model):
     run_id = models.AutoField(primary_key = True)
@@ -69,9 +85,14 @@ class ModelRunORM(models.Model):
         related_name = "runs"
     )
 
-    model_version = models.CharField(max_length = 50)
+    model_version_id = models.ForeignKey(
+        ModelVersionORM,
+        on_delete = models.PROTECT,
+        db_column = "model_version_id",
+        related_name = "runs"
+    )
 
-    parameter_version = models.ForeignKey(
+    parameter_version_id = models.ForeignKey(
         ParameterVersionORM,
         on_delete = models.PROTECT,
         db_column = "parameter_version"
@@ -94,6 +115,7 @@ class ModelRunORM(models.Model):
 
     class Meta:
         db_table = "model_runs"
+    
     
     
 class AnyLogORM(models.Model):
