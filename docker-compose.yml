@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:15
+    container_name: cmgs_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: cmgs
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # i dati persistono tra restart
+
+  redis:
+    image: redis:7
+    container_name: cmgs_redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
