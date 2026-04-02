@@ -44,7 +44,7 @@ class DjangoRunRepository(IRunRepository):
         except ModelRunORM.DoesNotExist:
             # Run does not exist (--> application-level error)
             raise RunNotFoundError(
-                f"Run with id {run_id} not found."
+                f"Run {run_id} not found."
             )
         
         except OperationalError as e:
@@ -154,7 +154,7 @@ class DjangoRunRepository(IRunRepository):
         if updated == 0:
             # No run was found in DB.
             raise RunNotFoundError(
-                f"Cannot update run {run.run_id}: run not found in database."
+                f"Run {run.run_id} not found during conditional update."
             )
 
     
@@ -179,12 +179,25 @@ class DjangoRunRepository(IRunRepository):
                 "Cannot update a run without a run_id."
             )
         
+
+
+        ### ----> INCAPSULATE COMMON PART BETWEEN save and save_if_status ???
+
+
+        
+        
+        # Mutable fields of a ModelRun
+        raw_mutable_data = run.get_mutable_fields()
+        updates = {
+            k: self._serialize_for_db(v) for k, v in raw_mutable_data.items()
+        }
+        
         try:
             updated = ModelRunORM.objects.filter(
                 pk=run.run_id,
                 status=expected_status,
             ).update(
-                ...
+                **updates
             )
 
         except OperationalError as e:
@@ -192,10 +205,18 @@ class DjangoRunRepository(IRunRepository):
                 f"Database error during conditional update of run {run.run_id}: {e}"
             ) from e
 
-        return updated == 1
-    
-
-        ### ----> INCAPSULATE COMMON PART BETWEEN save and save_if_status ???
+        if updated == 1:
+            return True
+        
+        # Disambiguate reason behind updated == 0
+        exists = ModelRunORM.objects.filter(pk=run.run_id).exists()
+        if not exists:
+            raise RunNotFoundError(
+                f"Run {run.run_id} not found during conditional update."
+            )
+        
+        # Run exists but status had already changes - race condition, expected
+        return False
 
     
 
