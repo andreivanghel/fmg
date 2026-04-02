@@ -1,3 +1,7 @@
+import dataclasses
+from enum import Enum
+from typing import Any
+
 from django.db import OperationalError, IntegrityError, ProgrammingError
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -126,14 +130,20 @@ class DjangoRunRepository(IRunRepository):
         """
         if run.run_id is None:
             raise MissingRunIdError(
-                "Cannot save a run without a run_id."
+                "Cannot update a run without a run_id."
             )
+        
+        # Mutable fields of a ModelRun
+        raw_mutable_data = run.get_mutable_fields()
+        updates = {
+            k: self._serialize_for_db(v) for k, v in raw_mutable_data.items()
+        }
         
         try:
             updated = ModelRunORM.objects.filter(
                 pk=run.run_id
             ).update(
-                ...
+                **updates
             )
 
         except OperationalError as e:
@@ -166,7 +176,7 @@ class DjangoRunRepository(IRunRepository):
         """
         if run.run_id is None:
             raise MissingRunIdError(
-                "Cannot save a run without a run_id."
+                "Cannot update a run without a run_id."
             )
         
         try:
@@ -179,10 +189,13 @@ class DjangoRunRepository(IRunRepository):
 
         except OperationalError as e:
             raise DatabaseError(
-                f"Database error while conditional save of run {run.run_id}: {e}"
+                f"Database error during conditional update of run {run.run_id}: {e}"
             ) from e
 
         return updated == 1
+    
+
+        ### ----> INCAPSULATE COMMON PART BETWEEN save and save_if_status ???
 
     
 
@@ -235,3 +248,15 @@ class DjangoRunRepository(IRunRepository):
             created_at=run.created_at
             # --> do we need to include mutable fields as = None ???
         )
+    
+    def _serialize_for_db(self, field_data: Any) -> Any:
+        """Helper for making domain field data JSON-friendly."""
+        if isinstance(field_data, Enum):
+            return field_data.value
+        if dataclasses.is_dataclass(field_data):
+            return dataclasses.asdict(field_data)
+        if isinstance(field_data, list):
+            return [self._serialize_for_db(item) for item in field_data]
+        if isinstance(field_data, dict):
+            return {k: self._serialize_for_db(v) for k, v in field_data.items()}
+        return field_data
