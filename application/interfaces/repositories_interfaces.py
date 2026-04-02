@@ -9,14 +9,18 @@ class IRunRepository(ABC):
     
     @abstractmethod
     def create(self, run: ModelRun) -> int:
+        """INSERT - returns the generated run_id"""
         pass
     
     @abstractmethod
     def save(self, run: ModelRun) -> None:
+        """UPDATE - updates an existing run"""
         pass
 
     @abstractmethod
-    def save_if_status(self, run: ModelRun, expected_status: RunStatus):
+    def save_if_status(self, run: ModelRun, expected_status: RunStatus) -> bool:
+        """Atomic UPDATE - updates an existing run is its expected status is expected_status.
+        Returns True if the update is completed, and False otherwise"""
         pass
 
 

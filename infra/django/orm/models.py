@@ -115,6 +115,31 @@ class ModelRunORM(models.Model):
 
     class Meta:
         db_table = "model_runs"
+
+
+
+class OutboxEventORM(models.Model):
+    id          = models.AutoField(primary_key=True)
+
+    event_type  = models.CharField(max_length=100)
+
+    payload     = models.JSONField()
+
+    created_at  = models.DateTimeField()
+
+    processed   = models.BooleanField(default=False)
+
+    processed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "outbox_events"
+
+        #   The outbox workes performs many queries on this table, 
+        #   looking for processed=False events. 
+        #   This composite index makes the query faster.
+        indexes = [
+            models.Index(fields=["processed", "created_at"]) 
+        ]
     
     
     
