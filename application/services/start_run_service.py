@@ -4,23 +4,28 @@ from domain.entities import ModelRun
 
 class StartRunService:
 
-    def __init__(self, run_repository: IRunRepository, task_dispatcher: ITaskDispatcher):
+    def __init__(
+            self, 
+            run_repository: IRunRepository, 
+            task_dispatcher: ITaskDispatcher
+    ) -> None:
         self.run_repository = run_repository
         self.task_dispatcher = task_dispatcher
 
+    ### maybe standardize with def execute for all services
     def start_run(
             self, 
-            model_id: str, 
-            model_version: str,
-            parameters_version: str
+            model_id: int, 
+            model_version_id: int,
+            parameter_version_id: int
     ) -> str:
 
         ### manage errors!!!
 
-        run = ModelRun.create(model_id, model_version, parameters_version)
+        run = ModelRun.create(model_id, model_version_id, parameter_version_id)
 
-        self.run_repository.save(run) ### deve restituire una nuova istanza di ModelRun!!! aggiornata. è frozen
+        saved_run = self.run_repository.save(run)
 
-        self.task_dispatcher.dispatch_run(run.id)
+        self.task_dispatcher.dispatch_run(saved_run.run_id)
 
-        return run.id
+        return saved_run.run_id

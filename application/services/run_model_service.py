@@ -4,6 +4,8 @@ from application.factories.model_factory import ModelFactory
 from domain.enums import RunStatus
 
 
+### TO BE REFACTORED (concurrency, transaction boundaries, error handling, protected dispatch checks)
+
 class RunModelService:
 
     def __init__(
@@ -24,31 +26,33 @@ class RunModelService:
             run_id: str
     ) -> None:
 
+        ### CONCURRENCY!!!
         run = self.run_repository.get(run_id)
         if run.status != RunStatus.PENDING:
             return
 
-        run.mark_as_running()
-        self.run_repository.save(run)
+        running_run = run.mark_as_running() ### update logic! replace, not modify in place.
+        self.run_repository.save(running_run)
 
         try:
-            model = self.model_factory.get(run.model_id, run.model_version)
-            parameters = self.parameters_repository.get(run.model_id, run.parameters_version)
+            model = self.model_factory.get(running_run.model_id, running_run.model_version_id)
+            parameters = self.parameters_repository.get(running_run.model_id, running_run.parameter_version_id)
 
             outputs = model.run(parameters)
-            run.mark_as_outputs_generated(outputs)
+            final_run = running_run.apply_outputs(outputs)
 
+        ### we need more granular error signaling
         except Exception as e:
             ### add logger
-            run.mark_as_failed(str(e))
+            final_run = running_run.mark_as_failed(str(e))
             
         finally: 
             try:
-                self.run_repository.save(run)
+                self.run_repository.save(final_run)
 
             except Exception:
                 #logging
                 raise
-
-        if run.status == RunStatus.OUTPUTS_GENERATED:
-            self.task_dispatcher.dispatch_checks(run.id)
+        ### we need ATOMICITY! --> outbox pattern
+        if final_run.status == RunStatus.OUTPUTS_GENERATED:
+            self.task_dispatcher.dispatch_checks(final_run.id)

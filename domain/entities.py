@@ -7,6 +7,15 @@ from domain.exceptions import InvalidStateTransitionError, EmptyParameterSet
 
 ### --> manage what happens after a run is finished... 
 ###     for each method that performs some action on via RunRepository...!
+@dataclass(frozen=True)
+class FinancialModel:
+    model_id: int | None
+    model_name: str
+    description: str
+    is_active: bool
+    created_at: datetime
+### write create / reconstitute...
+
 
 @dataclass(frozen=True)
 class ModelVersion:

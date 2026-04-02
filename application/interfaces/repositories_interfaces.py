@@ -1,14 +1,22 @@
-from domain.entities import ModelRun, ParameterSet
+from domain.entities import ModelRun, ParameterSet, FinancialModel, RunStatus
 from abc import ABC, abstractmethod
 
 class IRunRepository(ABC):
-    
-    @abstractmethod
-    def save(self, run: ModelRun) -> ModelRun:
-        pass
 
     @abstractmethod
     def get(self, run_id: str) -> ModelRun:
+        pass
+    
+    @abstractmethod
+    def create(self, run: ModelRun) -> int:
+        pass
+    
+    @abstractmethod
+    def save(self, run: ModelRun) -> None:
+        pass
+
+    @abstractmethod
+    def save_if_status(self, run: ModelRun, expected_status: RunStatus):
         pass
 
 
@@ -21,4 +29,74 @@ class IParametersRepository(ABC):
 
     @abstractmethod
     def get(self, model_id: str, parameters_id: str) -> ParameterSet:
+        pass
+
+
+
+class IModelRepository(ABC):
+
+    @abstractmethod
+    def save(self, model: FinancialModel):
+        pass
+
+
+
+class IUnitOfWork(ABC):
+
+    @abstractmethod
+    def __enter__(self):
+        pass
+
+    @abstractmethod
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    @abstractmethod
+    def commit(self):
+        pass
+
+    @abstractmethod
+    def rollback(self):
+        pass
+
+
+
+class IOutboxRepository(ABC):
+
+    @abstractmethod
+    def save(self, event) -> None:
+        pass
+
+    @abstractmethod
+    def get_pending(self, limit: int):
+        pass
+
+    @abstractmethod
+    def mark_as_sent(self, event_id: str) -> None:
+        pass
+
+
+
+class IEventPublisher(ABC):
+
+    @abstractmethod
+    def publish(self, event) -> None:
+        pass
+
+
+
+class IAuditLogger(ABC):
+    
+    @abstractmethod
+    def log_event(
+            self, 
+            action: str, 
+            entity_type: str, 
+            entity_id: str, 
+            user: str, 
+            details: dict
+    ) -> None:
+        """
+        Writes a log row in the audit log.
+        """
         pass

@@ -3,7 +3,7 @@ from domain.checks import Check
 from domain.entities import CheckResult
 from domain.exceptions import ModelExecutionError
 
-class FinancialModel(ABC):
+class FinancialModelExecutor(ABC):
 
     @abstractmethod
     def _run(self, params: dict) -> dict: 
@@ -23,7 +23,7 @@ class FinancialModel(ABC):
     def __generic_checks(self) -> list[Check]:
         from domain.checks import OutputNotEmptyCheck
         return [
-            OutputNotEmptyCheck
+            OutputNotEmptyCheck()
         ]
     
     def run_checks(self, outputs: dict) -> list[CheckResult]:
