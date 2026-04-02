@@ -1,5 +1,5 @@
 from __future__ import annotations
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, replace, field, fields
 from typing import Any
 from datetime import datetime, timezone
 from domain.enums import RunStatus, CheckType, CheckOutcome, CheckSeverity
@@ -172,15 +172,25 @@ class CheckResult:
 @dataclass(frozen=True)
 class ModelRun:
     run_id: int | None
-    model_id: int
-    model_version_id: int
-    parameter_version_id: int
-    status: RunStatus
-    created_at: datetime
-    completed_at: datetime | None = None
-    outputs: dict[str, Any] | None = None
-    check_results: list[CheckResult] | None = None
-    error_message: str | None = None
+    model_id: int = field(metadata={"mutable": False})
+    model_version_id: int = field(metadata={"mutable": False})
+    parameter_version_id: int = field(metadata={"mutable": False})
+    status: RunStatus = field(metadata={"mutable": True})
+    created_at: datetime = field(metadata={"mutable": False})
+    completed_at: datetime | None = field(default=None, metadata={"mutable": True})
+    outputs: dict[str, Any] | None = field(default=None, metadata={"mutable": True})
+    check_results: list[CheckResult] | None = field(default=None, metadata={"mutable": True})
+    error_message: str | None = field(default=None, metadata={"mutable": True})
+
+    def get_mutable_fields(self) -> dict[str, Any]:
+        """
+        Returns the field that be updated during the life cycle of a model run.
+        """
+        return {
+            f.name: getattr(self, f.name)
+            for f in fields(self)
+            if f.metadata.get("mutable", False)
+        }
 
     @classmethod
     def create(
