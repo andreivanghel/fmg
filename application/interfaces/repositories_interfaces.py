@@ -6,12 +6,12 @@ class IRunRepository(ABC):
     @abstractmethod
     def get(self, run_id: str) -> ModelRun:
         pass
-    
+
     @abstractmethod
     def create(self, run: ModelRun) -> int:
         """INSERT - returns the generated run_id"""
         pass
-    
+
     @abstractmethod
     def save(self, run: ModelRun) -> None:
         """UPDATE - updates an existing run"""
@@ -28,22 +28,19 @@ class IRunRepository(ABC):
 class IParametersRepository(ABC):
 
     @abstractmethod
-    def save(self, parameter_set: ParameterSet) -> ParameterSet:
+    def create(self, parameter_set: ParameterSet) -> int:
+        """INSERT - returns the generated parameters_id"""
+        pass
+
+    @abstractmethod
+    def save(self, parameter_set: ParameterSet) -> None:
         pass
 
     @abstractmethod
     def get(self, model_id: str, parameters_id: str) -> ParameterSet:
         pass
 
-
-
-class IModelRepository(ABC):
-
-    @abstractmethod
-    def save(self, model: FinancialModel):
-        pass
-
-
+ 
 
 class IUnitOfWork(ABC):
 

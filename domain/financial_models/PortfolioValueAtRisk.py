@@ -2,9 +2,11 @@ import yaml
 import numpy as np
 import pandas as pd
 import yfinance as yf
-from domain.models import FinancialModel
+from domain.models import FinancialModelExecutor
 
-class PortfolioVaR(FinancialModel):
+yf.set_tz_cache_location("/tmp/py-yfinance-cache")
+
+class PortfolioVaR(FinancialModelExecutor):
 
     def _run(self, params: dict) -> dict:
 

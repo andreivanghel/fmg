@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from domain.entities import ModelRun, RunStatus
 from application.interfaces.repositories_interfaces import IRunRepository
 from application.exceptions import RunNotFoundError, EarlyRunIdAssignmentError, MissingRunIdError
-from infra.django.orm.models import ModelRunORM
+from infra.django.models import ModelRunORM
 from infra.exceptions import DatabaseError, InfrastructureError
 
 
@@ -59,11 +59,7 @@ class DjangoRunRepository(IRunRepository):
                 f"SQL error while fetching run {run_id}: {e}"
             ) from e 
         
-        except Exception as e:
-            # Fallback
-            raise InfrastructureError(
-                f"Internal infrastructure error while fetching run {run_id}: {e}"
-            ) from e
+        # let other exceptions propagate: they are likely programming errors that should be fixed in the code, not handled at runtime.
 
     
     def create(self, run: ModelRun) -> int:
@@ -109,11 +105,6 @@ class DjangoRunRepository(IRunRepository):
                 f"Database error while creating run: {e}"
             ) from e
         
-        except Exception as e:
-            # Fallback
-            raise InfrastructureError(
-                f"Internal infrastructure error while creating a new run: {e}"
-            ) from e
         
 
     def save(self, run: ModelRun) -> None:
@@ -265,8 +256,8 @@ class DjangoRunRepository(IRunRepository):
             model_id=run.model_id,
             model_version_id=run.model_version_id,
             parameter_version_id=run.parameter_version_id,
-            status=run.status,
-            created_at=run.created_at
+            status=run.status.value,
+            # created_at=run.created_at # this field has a default value in the ORM model, so we don't need to set it explicitly
             # --> do we need to include mutable fields as = None ???
         )
     

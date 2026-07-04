@@ -25,7 +25,7 @@ class Check(ABC):
         completion_time = datetime.now(timezone.utc)
 
         return CheckResult(
-            self.name(),
+            self.name,
             outcome,
             self.check_type,
             self.severity,

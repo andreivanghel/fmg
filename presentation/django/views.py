@@ -12,7 +12,7 @@ from presentation.django.serializers import StartRunRequestSerializer, StartRunR
 
 class StartRunView(APIView):
 
-    def _make_service(self) -> StartRunService:
+    def _make_service(self) -> StartRunService: # NOTE: this should be placed in a composition root...
         return StartRunService(
             run_repository = DjangoRunRepository(),
             task_dispatcher = CeleryTaskDispatcher()

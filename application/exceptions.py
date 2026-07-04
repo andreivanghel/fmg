@@ -32,3 +32,27 @@ class ParametersNotFoundError(ApplicationError):
     Raised when a parameter set is not found within the database.
     """
     pass
+
+class EarlyParamsSetIdAssignmentError(ApplicationError):
+    """
+    Raised when attempting to create a new parameter set in the database, but the parameter set instance already has an assigned id.
+    """
+    pass
+
+class MissingParamsSetIdError(ApplicationError):
+    """
+    Raised when attempting to update an existing parameter set in the database, but the parameter set instance does not have an assigned id.
+    """
+    pass
+
+class RunAlreadyStartedError(ApplicationError):
+    """
+    Raised when attempting to start a run that has already been started.
+    """
+    pass
+
+class DatabaseError(ApplicationError):
+    """
+    Raised when an error occurs within the database.
+    """
+    pass

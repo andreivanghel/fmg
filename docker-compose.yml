@@ -17,5 +17,22 @@ services:
     ports:
       - "6379:6379"
 
+  celery_worker:
+    build: . # Usa lo stesso Dockerfile della tua app Python
+    command: celery -A infra.celery.app worker --loglevel=info
+    volumes:
+      - .:/code # Se mappi il codice in locale per i cambi a caldo
+    depends_on:
+      - redis
+      - db
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=cmgs
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+
 volumes:
   postgres_data:

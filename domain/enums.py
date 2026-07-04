@@ -1,4 +1,9 @@
-from enum import Enum
+from enum import Enum, auto
+
+class FieldMutability(Enum):
+    IMMUTABLE = auto()   # Never changes
+    MUTABLE = auto()     # Can change arbitrarily
+    CONTROLLED = auto()  # Changes only through specific transitions/methods (e.g., approved)
 
 class RunStatus(str, Enum):
     PENDING = "pending"

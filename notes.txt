@@ -6,6 +6,9 @@ Il progetto finale avrà diversi moduli:
     - model parameters version + parameters retrieval system
 
 
+IDEA: distinguish between error type and error message!
+
+
 
 Volendo fare bene le transizioni:
 # domain/entities.py

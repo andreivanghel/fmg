@@ -2,8 +2,10 @@ from __future__ import annotations
 from dataclasses import dataclass, replace, field, fields
 from typing import Any
 from datetime import datetime, timezone
-from domain.enums import RunStatus, CheckType, CheckOutcome, CheckSeverity
+from domain.enums import FieldMutability, RunStatus, CheckType, CheckOutcome, CheckSeverity
 from domain.exceptions import InvalidStateTransitionError, EmptyParameterSet
+
+# TODO: use the same exact naming everywhere within this project
 
 ### --> manage what happens after a run is finished... 
 ###     for each method that performs some action on via RunRepository...!
@@ -87,11 +89,21 @@ class ModelVersion:
 @dataclass(frozen=True)
 class ParameterSet:
     parameter_version_id: int | None
-    model_id: int
-    parameter_version: str
-    parameter_set: dict
-    approved: bool
-    created_at: datetime
+    model_id: int = field(metadata={"mutability": FieldMutability.IMMUTABLE})
+    parameter_version: str = field(metadata={"mutability": FieldMutability.MUTABLE})
+    parameter_set: dict = field(metadata={"mutability": FieldMutability.MUTABLE})
+    approved: bool = field(metadata={"mutability": FieldMutability.CONTROLLED})
+    created_at: datetime = field(metadata={"mutability": FieldMutability.IMMUTABLE})
+
+    def get_mutable_fields(self) -> dict[str, Any]: # this is a little contamination of the domain entity with the repository implementation, but it is a convenient way to get the fields that can be updated during the life cycle of a model run.
+        """
+        Returns the field that be updated during the life cycle of a parameter set.
+        """
+        return {
+            f.name: getattr(self, f.name)
+            for f in fields(self)
+            if f.metadata.get("mutability") == FieldMutability.MUTABLE
+        }
 
     @classmethod
     def create(
@@ -138,7 +150,7 @@ class ParameterSet:
             approved = approved,
             created_at = created_at
         )
-    
+
     def approve(self) -> ParameterSet:
         """
         Evolves the parameter set to approved state.
@@ -148,7 +160,7 @@ class ParameterSet:
             raise InvalidStateTransitionError(
                 f"The parameter version {self.parameter_version} for model {self.model_id} is already approved."
             )
-        
+
         return replace(
             self,
             approved = True
@@ -182,7 +194,7 @@ class ModelRun:
     check_results: list[CheckResult] | None = field(default=None, metadata={"mutable": True})
     error_message: str | None = field(default=None, metadata={"mutable": True})
 
-    def get_mutable_fields(self) -> dict[str, Any]:
+    def get_mutable_fields(self) -> dict[str, Any]: # this is a little contamination of the domain entity with the repository implementation, but it is a convenient way to get the fields that can be updated during the life cycle of a model run.
         """
         Returns the field that be updated during the life cycle of a model run.
         """

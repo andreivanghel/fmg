@@ -1,3 +1,5 @@
+import traceback
+
 from application.interfaces.repositories_interfaces import IRunRepository
 from application.interfaces.tasks_interfaces import ITaskDispatcher
 from application.factories.model_factory import ModelFactory
@@ -19,21 +21,26 @@ class RunChecksService():
 
     def run_checks(
             self, 
-            run_id: str
+            run_id: int
     ) -> None:
-        
+        print(f"Running checks for run_id: {run_id}")
         run = self.run_repository.get(run_id)
         if run.status != RunStatus.OUTPUTS_GENERATED:
             ### logging?
             return
 
         try:
-            model = self.model_factory.get(run.model_id, run.model_version)
+            model = self.model_factory.get(run.model_id, run.model_version_id)
             check_results = model.run_checks(run.outputs)
-            run.apply_checks(check_results)
+            print(f"Outputs: {run.outputs}")
+            print(f"Check results: {check_results}")
+            final_run = run.apply_checks(check_results)
 
         except Exception as e:
-            run.mark_as_checks_error(str(e))
+            import traceback
+
+            traceback.print_exc()
+            final_run = run.mark_as_checks_error(str(e))
 
         finally:
-            self.run_repository.save(run)
+            self.run_repository.save(final_run)

@@ -24,8 +24,8 @@ class StartRunService:
 
         run = ModelRun.create(model_id, model_version_id, parameter_version_id)
 
-        saved_run = self.run_repository.save(run)
+        run_id = self.run_repository.create(run)
 
-        self.task_dispatcher.dispatch_run(saved_run.run_id)
+        self.task_dispatcher.dispatch_run(run_id) # TODO: Race condition: if the task is executed before the transaction is committed, the run will not be found in the database. ( do We need to use an outbox pattern to avoid this. (?))
 
-        return saved_run.run_id
+        return run_id

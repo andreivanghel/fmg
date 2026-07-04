@@ -23,7 +23,7 @@ class RunModelService:
 
     def run_model(
             self, 
-            run_id: str
+            run_id: int
     ) -> None:
 
         ### CONCURRENCY!!!
@@ -31,14 +31,18 @@ class RunModelService:
         if run.status != RunStatus.PENDING:
             return
 
-        running_run = run.mark_as_running() ### update logic! replace, not modify in place.
+        running_run = run.mark_as_running()
         self.run_repository.save(running_run)
 
+        # TODO: If an error occurs before try final_run is never defined, so we need to handle that case
+        # final_run = None
         try:
             model = self.model_factory.get(running_run.model_id, running_run.model_version_id)
-            parameters = self.parameters_repository.get(running_run.model_id, running_run.parameter_version_id)
+            parameters = self.parameters_repository.get(running_run.parameter_version_id)
 
-            outputs = model.run(parameters)
+            parameter_set = parameters.parameter_set
+
+            outputs = model.run(parameter_set)
             final_run = running_run.apply_outputs(outputs)
 
         ### we need more granular error signaling
@@ -55,4 +59,4 @@ class RunModelService:
                 raise
         ### we need ATOMICITY! --> outbox pattern
         if final_run.status == RunStatus.OUTPUTS_GENERATED:
-            self.task_dispatcher.dispatch_checks(final_run.id)
+            self.task_dispatcher.dispatch_checks(final_run.run_id)

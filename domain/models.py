@@ -16,9 +16,8 @@ class FinancialModelExecutor(ABC):
         except Exception as e:
             raise ModelExecutionError(f"Error during model execution: {e}.") from e
 
-    @abstractmethod
     def _specific_checks(self) -> list[Check]:
-        pass
+        return []
 
     def __generic_checks(self) -> list[Check]:
         from domain.checks import OutputNotEmptyCheck

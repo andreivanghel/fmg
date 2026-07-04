@@ -1,6 +1,6 @@
 from application.interfaces.event_publisher import IEventPublisher
 from domain.events import DomainEvent
-from infra.django.orm.models import OutboxEventORM
+from infra.django.models import OutboxEventORM
 
 
 class DjangoOutboxEventPublisher(IEventPublisher):

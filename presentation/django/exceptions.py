@@ -12,7 +12,7 @@ from application.exceptions import (
     DatabaseError,
 )
 
-# mappa eccezione → (http_status, error_code)
+# Exception map → (http_status, error_code)
 EXCEPTION_MAP = {
     RunNotFoundError:        (status.HTTP_404_NOT_FOUND,            "run_not_found"),
     ModelNotFoundError:      (status.HTTP_404_NOT_FOUND,            "model_not_found"),
@@ -23,12 +23,12 @@ EXCEPTION_MAP = {
 
 def custom_exception_handler(exc, context):
 
-    # 1. lascia gestire a DRF quello che conosce (es. validazione serializer)
+    # 1. DRF manages the standard exceptions (ValidationError, NotFound, etc.)
     response = exception_handler(exc, context)
     if response is not None:
         return response
 
-    # 2. gestisci le custom exceptions
+    # 2. Manage custom exceptions defined in the application
     for exc_class, (http_status, error_code) in EXCEPTION_MAP.items():
         if isinstance(exc, exc_class):
             return Response(
@@ -36,8 +36,8 @@ def custom_exception_handler(exc, context):
                 status=http_status,
             )
 
-    # 3. safety net — qualcosa di completamente inaspettato
+    # 3. Safety net — something completely unexpected
     return Response(
-        {"error": "internal_error", "detail": "Errore interno del server"},
+        {"error": "internal_error", "detail": "Internal server error"},
         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
     )
