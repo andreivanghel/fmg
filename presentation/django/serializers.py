@@ -15,13 +15,13 @@ from domain.enums import RunStatus, CheckOutcome, CheckType, CheckSeverity
 
 
 class StartRunRequestSerializer(serializers.Serializer):
-    model_id = serializers.CharField(max_length=100)
-    model_version = serializers.CharField(max_length=50)
-    parameters_version = serializers.CharField(max_length=50)
+    model_id = serializers.IntegerField()
+    model_version_id = serializers.IntegerField()
+    parameter_version_id = serializers.IntegerField()
 
 
-class StartRunResponseSerializer(serializers.Serializer):
-    run_id = serializers.CharField(read_only=True)
+class RunIdSerializer(serializers.Serializer):
+    run_id = serializers.IntegerField(read_only=True)
 
 
 class CheckResultSerializer(serializers.Serializer):
@@ -36,10 +36,10 @@ class CheckResultSerializer(serializers.Serializer):
 
 
 class RunInfoSerializer(serializers.Serializer):
-    id = serializers.CharField(read_only=True)
-    model_id = serializers.CharField(read_only=True)
-    model_version = serializers.CharField(read_only=True)
-    parameters_version = serializers.CharField(read_only=True)
+    run_id = serializers.IntegerField(read_only=True)
+    model_id = serializers.IntegerField(read_only=True)
+    model_version_id = serializers.IntegerField(read_only=True)
+    parameter_version_id = serializers.IntegerField(read_only=True)
     status = serializers.ChoiceField(choices=[(s.value, s.value) for s in RunStatus], read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
     completed_at = serializers.DateTimeField(allow_null=True, read_only=True)

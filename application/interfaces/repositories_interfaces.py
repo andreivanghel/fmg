@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class IRunRepository(ABC):
 
     @abstractmethod
-    def get(self, run_id: str) -> ModelRun:
+    def get(self, run_id: int) -> ModelRun:
         pass
 
     @abstractmethod
@@ -37,7 +37,7 @@ class IParametersRepository(ABC):
         pass
 
     @abstractmethod
-    def get(self, model_id: str, parameters_id: str) -> ParameterSet:
+    def get(self, model_id: int, parameters_id: int) -> ParameterSet:
         pass
 
  

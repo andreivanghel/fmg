@@ -18,7 +18,7 @@ class StartRunService:
             model_id: int, 
             model_version_id: int,
             parameter_version_id: int
-    ) -> str:
+    ) -> int:
 
         ### manage errors!!!
 

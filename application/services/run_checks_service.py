@@ -37,8 +37,6 @@ class RunChecksService():
             final_run = run.apply_checks(check_results)
 
         except Exception as e:
-            import traceback
-
             traceback.print_exc()
             final_run = run.mark_as_checks_error(str(e))
 

@@ -1,4 +1,4 @@
-from infra.celery.app import celery_app
+from infra.celery.app import app
 from application.services.run_model_service import RunModelService
 from application.services.run_checks_service import RunChecksService
 from application.factories.model_factory import ModelFactory
@@ -7,8 +7,8 @@ from infra.django.repositories.parameters_repository import DjangoParametersRepo
 from infra.celery.task_dispatcher import CeleryTaskDispatcher
 
 
-@celery_app.task
-def run_model_task(run_id: str):
+@app.task
+def run_model_task(run_id: int):
 
     run_repository = DjangoRunRepository()
     parameters_repository = DjangoParametersRepository()
@@ -25,7 +25,7 @@ def run_model_task(run_id: str):
     service.run_model(run_id)
 
 
-@celery_app.task
+@app.task
 def run_checks_task(run_id: int):
 
     run_repository = DjangoRunRepository()

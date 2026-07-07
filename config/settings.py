@@ -31,11 +31,16 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+# Do we need this?
+# CELERY_BROKER_URL = 'redis://localhost:6379/0'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
 INSTALLED_APPS = [
     'infra.django',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'rest_framework',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
@@ -80,7 +85,7 @@ DATABASES = {
         'NAME': os.getenv('POSTGRES_DB', 'cmgs'),
         'USER': os.getenv('POSTGRES_USER', 'admin'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'admin'),
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'), 
+        'HOST': os.getenv('POSTGRES_HOST', 'cmgs_db'), 
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
