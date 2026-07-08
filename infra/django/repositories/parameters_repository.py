@@ -172,7 +172,7 @@ class DjangoParametersRepository(IParametersRepository):
         """
         return ParameterSet(
             parameter_version_id=orm_obj.pk,
-            model_id=orm_obj.model,
+            model_id=orm_obj.model_id,
             parameter_version=orm_obj.parameter_version,
             parameter_set=orm_obj.parameter_set,
             approved=orm_obj.approved,
@@ -184,7 +184,7 @@ class DjangoParametersRepository(IParametersRepository):
         Convert a domain entity to a Django ORM object for insertion.
         """
         return ParameterVersionORM(
-            model=parameter_set.model_id,
+            model_id=parameter_set.model_id,
             parameter_version=parameter_set.parameter_version,
             parameter_set=parameter_set.parameter_set,
             # approved=parameter_set.approved # this field defaults to false in the ORM model

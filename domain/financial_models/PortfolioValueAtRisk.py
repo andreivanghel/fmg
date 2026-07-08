@@ -1,8 +1,10 @@
+from typing import Any
+
 import yaml
 import numpy as np
 import pandas as pd
 import yfinance as yf
-from domain.models import FinancialModelExecutor
+from domain.financial_model_executor import FinancialModelExecutor
 
 yf.set_tz_cache_location("/tmp/py-yfinance-cache")
 
@@ -12,7 +14,7 @@ class PortfolioVaR(FinancialModelExecutor):
 
         confidence_levels = params["confidence_levels"]
         lookback_days = params["lookback_days"]
-        
+
         # CONFIGURATION (to be better parametrized!)
         config = self._load_config()
         tickers = config["tickers"]
@@ -36,7 +38,7 @@ class PortfolioVaR(FinancialModelExecutor):
         }
 
 
-    def _load_config(self) -> dict:
+    def _load_config(self) -> Any:
         with open("domain/financial_models/portfolio_var_config.yaml") as f:
             return yaml.safe_load(f)
 
@@ -47,9 +49,9 @@ class PortfolioVaR(FinancialModelExecutor):
         prices = raw_prices[PRICE_TYPE]
         if prices.isnull().values.any():
             prices = prices.ffill().dropna()
-        
+
         return prices
-    
+
     def _compute_portfolio_returns(
             self,
             prices: pd.DataFrame,

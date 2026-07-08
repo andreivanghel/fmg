@@ -37,7 +37,7 @@ class IParametersRepository(ABC):
         pass
 
     @abstractmethod
-    def get(self, model_id: int, parameters_id: int) -> ParameterSet:
+    def get(self, parameter_set_id: int) -> ParameterSet:
         pass
 
  
