@@ -1,5 +1,5 @@
 from domain.financial_models.PortfolioValueAtRisk import PortfolioVaR
-from domain.models import FinancialModelExecutor
+from domain.financial_model_executor import FinancialModelExecutor
 
 
 MODEL_REGISTRY = {

@@ -1,0 +1,13 @@
+services:
+  test:
+    build: .
+    command: pytest
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings_test
+      CELERY_BROKER_URL: redis://cmgs_redis:6379/1
+      CELERY_RESULT_BACKEND: redis://cmgs_redis:6379/1
+    depends_on:
+      cmgs_db:
+        condition: service_healthy
+      cmgs_redis:
+        condition: service_healthy

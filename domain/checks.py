@@ -47,7 +47,7 @@ class OutputNotEmptyCheck(Check):
     
     def _execute(self, outputs: dict) -> tuple[CheckOutcome, str, dict]:
         
-        if outputs and len(outputs) > 1:
+        if outputs and len(outputs) > 0:
             return (
                 CheckOutcome.PASSED, 
                 "Output is non-empty.", 

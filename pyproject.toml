@@ -1,0 +1,53 @@
+[project]
+name = "fmg"
+version = "0.1.0"
+description = "Financial model governance engine."
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "django>=5.2",
+    "djangorestframework",
+    "celery",
+    "redis",
+    "yfinance",
+]
+
+[project.optional-dependencies]
+
+dev = [
+    "pytest",
+    "pytest-django",
+    "pytest-cov",
+    "factory-boy",
+    "pytest-env",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings_test"
+testpaths = ["tests"]
+markers = [
+    "integration: e2e con celery worker e redis reali",
+]
+addopts = "--reuse-db"
+env = [
+    "CELERY_BROKER_URL=redis://localhost:6379/1",
+    "CELERY_RESULT_BACKEND=redis://localhost:6379/1",
+]
+
+[tool.mypy]
+python_version = "3.11"
+plugins = ["mypy_django_plugin.main"]
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings"
+
+[[tool.mypy.overrides]]
+module = [
+    "yfinance.*",
+    "celery.*",
+]
+ignore_missing_imports = true

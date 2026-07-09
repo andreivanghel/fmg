@@ -10,6 +10,7 @@ from infra.celery.task_dispatcher import CeleryTaskDispatcher
 @app.task
 def run_model_task(run_id: int):
 
+    # TODO: Adopt dependency injection AS SOON AS POSSIBLE. (--> composition root)
     run_repository = DjangoRunRepository()
     parameters_repository = DjangoParametersRepository()
     model_factory = ModelFactory()
@@ -28,6 +29,7 @@ def run_model_task(run_id: int):
 @app.task
 def run_checks_task(run_id: int):
 
+    # TODO: Adopt dependency injection AS SOON AS POSSIBLE. (--> composition root)
     run_repository = DjangoRunRepository()
     model_factory = ModelFactory()
     task_dispatcher = CeleryTaskDispatcher()
