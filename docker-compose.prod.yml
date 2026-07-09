@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:15
+    container_name: cmgs_db
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: cmgs_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    build: .
+    restart: always
+    command: celery -A config worker --loglevel=info
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+
+  web:
+    build: .
+    restart: always
+    # Gunicorn with 4 workers for concurrency; adjust the number of workers based on your server's CPU cores
+    command: sh -c "python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4"
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      celery_worker:
+        condition: service_started
+
+volumes:
+  postgres_data:
