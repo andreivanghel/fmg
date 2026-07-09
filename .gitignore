@@ -6,10 +6,6 @@ env/
 # Notebooks
 *.ipynb
 
-# Note personali
-notes.txt
-*.md
-
 # Python
 __pycache__/
 *.py[cod]
@@ -43,7 +39,6 @@ htmlcov/
 
 # Environment variables
 .env
-.env.*
 
 # IDE
 .vscode/
