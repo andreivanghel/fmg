@@ -1,3 +1,10 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["domain*", "application*", "infra*", "presentation*", "config*"]
+
 [project]
 name = "fmg"
 version = "0.1.0"
@@ -8,9 +15,13 @@ requires-python = ">=3.11"
 dependencies = [
     "django>=5.2",
     "djangorestframework",
+    "django-filter",
     "celery",
     "redis",
     "yfinance",
+    "python-dotenv",
+    "psycopg2-binary",
+    "PyYAML",
 ]
 
 [project.optional-dependencies]

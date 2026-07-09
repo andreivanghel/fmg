@@ -8,9 +8,9 @@ ENV PYTHONUNBUFFERED 1
 # Imposta la cartella di lavoro dentro il container
 WORKDIR /code
 
-# Copia il file delle dipendenze e installale
-COPY requirements.txt /code/
-RUN pip install --no-cache-dir -r requirements.txt
+# copia solo pyproject.toml e installa le dipendenze
+COPY pyproject.toml /code/
+RUN pip install --no-cache-dir -e ".[dev]"
 
 # Copia tutto il resto del tuo codice nel container
 COPY . /code/
