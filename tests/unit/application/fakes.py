@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
 
-from application.factories.model_factory import ModelFactory
-from application.interfaces.repositories_interfaces import IParametersRepository, IRunRepository
-from domain.entities import ModelRun, ParameterSet
-from domain.financial_model_executor import FinancialModelExecutor
+from fmg.application.factories.model_factory import ModelFactory
+from fmg.application.interfaces.repositories_interfaces import IParametersRepository, IRunRepository
+from fmg.domain.entities import ModelRun, ParameterSet
+from fmg.domain.financial_model_executor import FinancialModelExecutor
 
 mock_parameters = ParameterSet(
     parameter_version_id=None,

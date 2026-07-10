@@ -1,5 +1,5 @@
-from application.factories.model_factory import ModelFactory
-from domain.financial_model_executor import FinancialModelExecutor
+from fmg.application.factories.model_factory import ModelFactory
+from fmg.domain.financial_model_executor import FinancialModelExecutor
 
 
 class FakeModel(FinancialModelExecutor):

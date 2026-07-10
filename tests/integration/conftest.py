@@ -9,6 +9,6 @@ def api_client():
 
 @pytest.fixture(scope="module")
 def celery_worker():
-    from infra.celery.app import app
+    from fmg.infra.celery.app import app
     with start_worker(app, perform_ping_check=False, pool="solo") as worker:
         yield worker

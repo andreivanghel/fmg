@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["domain*", "application*", "infra*", "presentation*", "config*"]
+include = ["fmg*"]
 
 [project]
 name = "fmg"
@@ -35,7 +35,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "config.settings_test"
+DJANGO_SETTINGS_MODULE = "fmg.config.settings_test"
 testpaths = ["tests"]
 markers = [
     "integration: e2e con celery worker e redis reali",
@@ -54,7 +54,7 @@ warn_unused_configs = true
 check_untyped_defs = true
 
 [tool.django-stubs]
-django_settings_module = "config.settings"
+django_settings_module = "fmg.config.settings"
 
 [[tool.mypy.overrides]]
 module = [

@@ -27,7 +27,7 @@ services:
 
   celery_worker:
     build: . # Usa lo stesso Dockerfile della tua app Python
-    command: celery -A infra.celery.app worker --loglevel=info
+    command: celery -A fmg.infra.celery.app worker --loglevel=info
     volumes:
       - .:/code # Se mappi il codice in locale per i cambi a caldo
     depends_on:

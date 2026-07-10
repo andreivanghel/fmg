@@ -2,10 +2,10 @@
 from datetime import datetime, timezone
 
 import pytest
-from application.factories.model_factory import ModelFactory
-from application.services.run_model_service import RunModelService
-from domain.entities import ModelRun
-from domain.enums import RunStatus
+from fmg.application.factories.model_factory import ModelFactory
+from fmg.application.services.run_model_service import RunModelService
+from fmg.domain.entities import ModelRun
+from fmg.domain.enums import RunStatus
 from .fakes import (
     FakeModelFactory, FakeParametersRepository,
     InMemoryRunRepository, FakeTaskDispatcher,

@@ -1,5 +1,5 @@
 import factory
-from infra.django.models import (
+from fmg.infra.django.models import (
     FinancialModelORM,
     ModelVersionORM,
     ParameterVersionORM,

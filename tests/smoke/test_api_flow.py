@@ -1,12 +1,12 @@
 import pytest
-from domain.enums import RunStatus
+from fmg.domain.enums import RunStatus
 from tests.common.fakes import FakeModelFactory
 from .factories import FinancialModelORMFactory, ModelVersionORMFactory, ParameterVersionORMFactory
 
 
 @pytest.mark.django_db
 def test_run_checks_end_to_end(api_client, monkeypatch):
-    monkeypatch.setattr("infra.celery.tasks.ModelFactory", FakeModelFactory) # Until we have a proper DI container, we need to monkeypatch the ModelFactory used in the Celery tasks to use our FakeModelFactory for testing.
+    monkeypatch.setattr("fmg.infra.celery.tasks.ModelFactory", FakeModelFactory) # Until we have a proper DI container, we need to monkeypatch the ModelFactory used in the Celery tasks to use our FakeModelFactory for testing.
 
     model = FinancialModelORMFactory()
     model_version = ModelVersionORMFactory(model=model)
