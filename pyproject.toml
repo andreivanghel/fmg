@@ -52,9 +52,7 @@ plugins = ["mypy_django_plugin.main"]
 warn_return_any = true
 warn_unused_configs = true
 check_untyped_defs = true
-
-[tool.django-stubs]
-django_settings_module = "fmg.config.settings"
+exclude = ["migrations/"]
 
 [[tool.mypy.overrides]]
 module = [
@@ -62,3 +60,20 @@ module = [
     "celery.*",
 ]
 ignore_missing_imports = true
+
+
+[tool.django-stubs]
+django_settings_module = "fmg.config.settings"
+
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["migrations", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4"]  # pyflakes, pycodestyle, isort, upgrades, bugbear, comprehensions
+ignore = ["E501"]  # la lunghezza riga la gestisce già il formatter
+
+[tool.ruff.format]
+quote-style = "double"
