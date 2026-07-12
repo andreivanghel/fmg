@@ -1,10 +1,10 @@
-from fmg.infra.celery.app import app
-from fmg.application.services.run_model_service import RunModelService
-from fmg.application.services.run_checks_service import RunChecksService
 from fmg.application.factories.model_factory import ModelFactory
-from fmg.infra.django.repositories.run_repository import DjangoRunRepository
-from fmg.infra.django.repositories.parameters_repository import DjangoParametersRepository
+from fmg.application.services.run_checks_service import RunChecksService
+from fmg.application.services.run_model_service import RunModelService
+from fmg.infra.celery.app import app
 from fmg.infra.celery.task_dispatcher import CeleryTaskDispatcher
+from fmg.infra.django.repositories.parameters_repository import DjangoParametersRepository
+from fmg.infra.django.repositories.run_repository import DjangoRunRepository
 
 
 @app.task
@@ -20,7 +20,7 @@ def run_model_task(run_id: int):
         run_repository=run_repository,
         parameters_repository=parameters_repository,
         model_factory=model_factory,
-        task_dispatcher=task_dispatcher
+        task_dispatcher=task_dispatcher,
     )
 
     service.run_model(run_id)
@@ -35,9 +35,7 @@ def run_checks_task(run_id: int):
     task_dispatcher = CeleryTaskDispatcher()
 
     service = RunChecksService(
-        run_repository=run_repository,
-        model_factory=model_factory,
-        task_dispatcher=task_dispatcher
+        run_repository=run_repository, model_factory=model_factory, task_dispatcher=task_dispatcher
     )
 
     service.run_checks(run_id)

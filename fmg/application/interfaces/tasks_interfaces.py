@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-class ITaskDispatcher(ABC):
 
+class ITaskDispatcher(ABC):
     @abstractmethod
     def dispatch_run(self, run_id: int) -> None:
         pass

@@ -1,25 +1,27 @@
 ### WIP!!!
 # TO BE CHECKED / INTEGRATED !!!!
 
-from rest_framework.views import exception_handler
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import exception_handler
+
 from fmg.application.exceptions import (
-    RunNotFoundError,
-    ModelNotFoundError,
-    RunAlreadyStartedError,
-    ParametersNotFoundError,
     DatabaseError,
+    ModelNotFoundError,
+    ParametersNotFoundError,
+    RunAlreadyStartedError,
+    RunNotFoundError,
 )
 
 # Exception map → (http_status, error_code)
 EXCEPTION_MAP = {
-    RunNotFoundError:        (status.HTTP_404_NOT_FOUND,            "run_not_found"),
-    ModelNotFoundError:      (status.HTTP_404_NOT_FOUND,            "model_not_found"),
-    ParametersNotFoundError: (status.HTTP_404_NOT_FOUND,            "parameters_not_found"),
-    RunAlreadyStartedError:  (status.HTTP_409_CONFLICT,             "run_already_started"),
-    DatabaseError:           (status.HTTP_503_SERVICE_UNAVAILABLE,  "database_error"),
+    RunNotFoundError: (status.HTTP_404_NOT_FOUND, "run_not_found"),
+    ModelNotFoundError: (status.HTTP_404_NOT_FOUND, "model_not_found"),
+    ParametersNotFoundError: (status.HTTP_404_NOT_FOUND, "parameters_not_found"),
+    RunAlreadyStartedError: (status.HTTP_409_CONFLICT, "run_already_started"),
+    DatabaseError: (status.HTTP_503_SERVICE_UNAVAILABLE, "database_error"),
 }
+
 
 def custom_exception_handler(exc, context):
 

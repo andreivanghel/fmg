@@ -1,9 +1,13 @@
 import time
+
 import pytest
+
 from fmg.domain.enums import RunStatus
 from tests.common.fakes import FakeModelFactory
 from tests.smoke.factories import (
-    FinancialModelORMFactory, ModelVersionORMFactory, ParameterVersionORMFactory,
+    FinancialModelORMFactory,
+    ModelVersionORMFactory,
+    ParameterVersionORMFactory,
 )
 
 
@@ -19,9 +23,9 @@ def test_run_checks_end_to_end_real_broker(api_client, celery_worker, monkeypatc
     response = api_client.post(
         "/api/v1/runs/",
         data={
-            "model_id": model.pk,
-            "model_version_id": model_version.pk,
-            "parameter_version_id": param.pk,
+            "model_id": model.pk,  # type: ignore[attr-defined]
+            "model_version_id": model_version.pk,  # type: ignore[attr-defined]
+            "parameter_version_id": param.pk,  # type: ignore[attr-defined]
         },
         format="json",
     )
@@ -29,12 +33,15 @@ def test_run_checks_end_to_end_real_broker(api_client, celery_worker, monkeypatc
     run_id = response.data["run_id"]
 
     from fmg.infra.django.models import ModelRunORM
+
     for _ in range(20):
         run = ModelRunORM.objects.get(run_id=run_id)
         if run.status == RunStatus.COMPLETED.value:
             break
         time.sleep(0.5)
     else:
-        pytest.fail("il task non ha completato entro il timeout: possibile problema di broker/serializzazione")
+        pytest.fail(
+            "il task non ha completato entro il timeout: possibile problema di broker/serializzazione"
+        )
 
     assert run.status == RunStatus.COMPLETED.value

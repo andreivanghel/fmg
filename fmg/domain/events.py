@@ -1,20 +1,17 @@
+import dataclasses
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-import dataclasses
-from enum import Enum
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from enum import StrEnum
 
 
-class EventType(str, Enum):
+class EventType(StrEnum):
     CHECKS_REQUESTED = "checks_requested"
 
 
 @dataclass(frozen=True, kw_only=True)
 class DomainEvent(ABC):
-    created_at: datetime = field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        init=False
-    )
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC), init=False)
 
     @property
     @abstractmethod
@@ -28,21 +25,17 @@ class DomainEvent(ABC):
         data = dataclasses.asdict(self)
 
         # Removing abstract field metadata
-        data.pop('created_at', None)
+        data.pop("created_at", None)
         return data
-    
+
     def __post_init__(self):
         # Abstract class should not be instantiable
         if type(self) is DomainEvent:
-            raise TypeError(
-                "Cannot instantiate abstract class DomainEvent."
-            )
-        
+            raise TypeError("Cannot instantiate abstract class DomainEvent.")
+
         # Non-empty payload validation
         if not self.to_payload():
-            raise ValueError(
-                f"Empty event: {self.__class__.__name__}."
-            )
+            raise ValueError(f"Empty event: {self.__class__.__name__}.")
 
 
 @dataclass(frozen=True)
@@ -52,4 +45,3 @@ class ChecksRequested(DomainEvent):
     @property
     def event_type(self) -> EventType:
         return EventType.CHECKS_REQUESTED
-    

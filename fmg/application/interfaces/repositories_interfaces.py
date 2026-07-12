@@ -1,8 +1,21 @@
-from fmg.domain.entities import ModelRun, ParameterSet, FinancialModel, RunStatus
 from abc import ABC, abstractmethod
 
-class IRunRepository(ABC):
+from fmg.domain.entities import ModelRun, ParameterSet, RunStatus
 
+
+class IModelRepository(ABC):
+    """Interface for FinancialModel repositories (model metadata, e.g. VaR model).
+    TODO: concrete implementation and dedicated model factory not yet done —
+    CreateParametersSetService that uses it is not in the scope of the current MVP
+    (parameters are inserted manually via ORM for now).
+    """
+
+    @abstractmethod
+    def get_all_models_ids(self) -> list[int]:
+        pass
+
+
+class IRunRepository(ABC):
     @abstractmethod
     def get(self, run_id: int) -> ModelRun:
         pass
@@ -24,9 +37,7 @@ class IRunRepository(ABC):
         pass
 
 
-
 class IParametersRepository(ABC):
-
     @abstractmethod
     def create(self, parameter_set: ParameterSet) -> int:
         """INSERT - returns the generated parameters_id"""
@@ -40,10 +51,8 @@ class IParametersRepository(ABC):
     def get(self, parameter_set_id: int) -> ParameterSet:
         pass
 
- 
 
 class IUnitOfWork(ABC):
-
     @abstractmethod
     def __enter__(self):
         pass
@@ -61,9 +70,7 @@ class IUnitOfWork(ABC):
         pass
 
 
-
 class IOutboxRepository(ABC):
-
     @abstractmethod
     def save(self, event) -> None:
         pass
@@ -77,25 +84,16 @@ class IOutboxRepository(ABC):
         pass
 
 
-
 class IEventPublisher(ABC):
-
     @abstractmethod
     def publish(self, event) -> None:
         pass
 
 
-
 class IAuditLogger(ABC):
-    
     @abstractmethod
     def log_event(
-            self, 
-            action: str, 
-            entity_type: str, 
-            entity_id: str, 
-            user: str, 
-            details: dict
+        self, action: str, entity_type: str, entity_id: str, user: str, details: dict
     ) -> None:
         """
         Writes a log row in the audit log.

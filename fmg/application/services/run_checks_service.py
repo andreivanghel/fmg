@@ -1,32 +1,34 @@
 import traceback
 
+from fmg.application.factories.model_factory import ModelFactory
 from fmg.application.interfaces.repositories_interfaces import IRunRepository
 from fmg.application.interfaces.tasks_interfaces import ITaskDispatcher
-from fmg.application.factories.model_factory import ModelFactory
 from fmg.domain.enums import RunStatus
-from fmg.domain.entities import CheckResult
 
-class RunChecksService():
 
+class RunChecksService:
     def __init__(
-            self, 
-            run_repository: IRunRepository, 
-            model_factory: ModelFactory,
-            task_dispatcher: ITaskDispatcher # for actions tasks!
+        self,
+        run_repository: IRunRepository,
+        model_factory: ModelFactory,
+        task_dispatcher: ITaskDispatcher,  # for actions tasks!
     ):
         self.run_repository = run_repository
         self.model_factory = model_factory
         self.task_dispatcher = task_dispatcher
 
-
-    def run_checks(
-            self, 
-            run_id: int
-    ) -> None:
+    def run_checks(self, run_id: int) -> None:
         print(f"Running checks for run_id: {run_id}")
         run = self.run_repository.get(run_id)
         if run.status != RunStatus.OUTPUTS_GENERATED:
             ### logging?
+            return
+
+        if run.outputs is None:
+            run = run.mark_as_checks_error(
+                "Invariant violated: status OUTPUTS_GENERATED but outputs is None"
+            )
+            self.run_repository.save(run)
             return
 
         try:

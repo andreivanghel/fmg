@@ -1,13 +1,12 @@
-from fmg.domain.financial_models.PortfolioValueAtRisk import PortfolioVaR
 from fmg.domain.financial_model_executor import FinancialModelExecutor
-
+from fmg.domain.financial_models.PortfolioValueAtRisk import PortfolioVaR
 
 MODEL_REGISTRY = {
     (1, 1): PortfolioVaR,
 }
 
-class ModelFactory:
 
+class ModelFactory:
     ### to be Github-based!!!
     @staticmethod
     def get(model_id: int, version_id: int) -> FinancialModelExecutor:

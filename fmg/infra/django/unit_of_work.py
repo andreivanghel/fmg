@@ -1,9 +1,9 @@
 from django.db import transaction
+
 from fmg.application.interfaces.unit_of_work import IUnitOfWork
 
 
 class DjangoUnitOfWork(IUnitOfWork):
-
     def __enter__(self):
         self._atomic = transaction.atomic()
         self._atomic.__enter__()

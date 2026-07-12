@@ -1,11 +1,13 @@
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
+
 
 class FieldMutability(Enum):
-    IMMUTABLE = auto()   # Never changes
-    MUTABLE = auto()     # Can change arbitrarily
+    IMMUTABLE = auto()  # Never changes
+    MUTABLE = auto()  # Can change arbitrarily
     CONTROLLED = auto()  # Changes only through specific transitions/methods (e.g., approved)
 
-class RunStatus(str, Enum):
+
+class RunStatus(StrEnum):
     PENDING = "pending"
     RUNNING = "running"
     OUTPUTS_GENERATED = "outputs_generated"
@@ -14,71 +16,75 @@ class RunStatus(str, Enum):
     CHECKS_ERROR = "checks_error"
     FAILED = "failed"
 
-class CheckType(str, Enum):
+
+class CheckType(StrEnum):
     GENERIC = "generic"
     SPECIFIC = "specific"
 
-class CheckOutcome(str, Enum):
+
+class CheckOutcome(StrEnum):
     PASSED = "passed"
     WARNING = "warning"
     FAILED = "failed"
 
-class CheckSeverity(str, Enum):
+
+class CheckSeverity(StrEnum):
     ERROR = "error"
     WARNING = "warning"
     INFO = "info"
 
-class EventType(str, Enum):
 
+class EventType(StrEnum):
     # -------------------------------------------------------------------------
     # FINANCIAL MODEL
     # -------------------------------------------------------------------------
-    MODEL_REGISTERED          = "model_registered"
-    MODEL_ACTIVATED           = "model_activated"
-    MODEL_DEACTIVATED         = "model_deactivated"
+    MODEL_REGISTERED = "model_registered"
+    MODEL_ACTIVATED = "model_activated"
+    MODEL_DEACTIVATED = "model_deactivated"
 
     # -------------------------------------------------------------------------
     # MODEL VERSION
     # -------------------------------------------------------------------------
-    MODEL_VERSION_REGISTERED  = "model_version_registered"
-    MODEL_VERSION_APPROVED    = "model_version_approved"
-    MODEL_VERSION_REJECTED    = "model_version_rejected"
-    MODEL_VERSION_DEPRECATED  = "model_version_deprecated"
+    MODEL_VERSION_REGISTERED = "model_version_registered"
+    MODEL_VERSION_APPROVED = "model_version_approved"
+    MODEL_VERSION_REJECTED = "model_version_rejected"
+    MODEL_VERSION_DEPRECATED = "model_version_deprecated"
 
     # -------------------------------------------------------------------------
     # PARAMETER SET
     # -------------------------------------------------------------------------
-    PARAMETERS_REGISTERED     = "parameters_registered"
-    PARAMETERS_APPROVED       = "parameters_approved"
-    PARAMETERS_REJECTED       = "parameters_rejected"
-    PARAMETERS_DEPRECATED     = "parameters_deprecated"
+    PARAMETERS_REGISTERED = "parameters_registered"
+    PARAMETERS_APPROVED = "parameters_approved"
+    PARAMETERS_REJECTED = "parameters_rejected"
+    PARAMETERS_DEPRECATED = "parameters_deprecated"
 
     # -------------------------------------------------------------------------
     # MODEL RUN
     # -------------------------------------------------------------------------
-    RUN_STARTED               = "run_started"
-    RUN_OUTPUTS_GENERATED     = "run_outputs_generated"
-    RUN_FAILED                = "run_failed"
+    RUN_STARTED = "run_started"
+    RUN_OUTPUTS_GENERATED = "run_outputs_generated"
+    RUN_FAILED = "run_failed"
 
     # -------------------------------------------------------------------------
     # CHECKS
     # -------------------------------------------------------------------------
-    CHECKS_STARTED            = "checks_started"
-    CHECKS_COMPLETED          = "checks_completed"         
-    CHECKS_FAILED             = "checks_failed"            
-    CHECKS_NOT_EXECUTED       = "checks_not_executed"  
+    CHECKS_STARTED = "checks_started"
+    CHECKS_COMPLETED = "checks_completed"
+    CHECKS_FAILED = "checks_failed"
+    CHECKS_NOT_EXECUTED = "checks_not_executed"
 
     # -------------------------------------------------------------------------
     # ACTIONS
-    # -------------------------------------------------------------------------    
-    ACTION_EXECUTED           = "action_executed"
+    # -------------------------------------------------------------------------
+    ACTION_EXECUTED = "action_executed"
 
     # -------------------------------------------------------------------------
     # SYSTEM
     # -------------------------------------------------------------------------
-    SYSTEM_ERROR              = "system_error"
-    SYSTEM_WARNING            = "system_warning"
+    SYSTEM_ERROR = "system_error"
+    SYSTEM_WARNING = "system_warning"
 
-class EventRelevance(str, Enum):
+
+class EventRelevance(StrEnum):
     MAJOR = "major"
     MINOR = "minor"

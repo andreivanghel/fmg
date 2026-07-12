@@ -2,19 +2,18 @@ from abc import ABC, abstractmethod
 
 
 class IUnitOfWork(ABC):
-
     @abstractmethod
-    def __enter__(self): 
+    def __enter__(self):
         pass
 
     @abstractmethod
-    def __exit__(self, exc_type, exc_val, exc_tb): 
+    def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
     @abstractmethod
-    def commit(self) -> None: 
+    def commit(self) -> None:
         pass
 
     @abstractmethod
-    def rollback(self) -> None: 
+    def rollback(self) -> None:
         pass

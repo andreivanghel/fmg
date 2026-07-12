@@ -1,13 +1,19 @@
 from __future__ import annotations
-from dataclasses import dataclass, replace, field, fields
+
+from dataclasses import dataclass, field, fields, replace
+from datetime import UTC, datetime
 from typing import Any
-from datetime import datetime, timezone
-from fmg.domain.enums import FieldMutability, RunStatus, CheckType, CheckOutcome, CheckSeverity
-from fmg.domain.exceptions import InvalidStateTransitionError, EmptyParameterSet
+
+from fmg.domain.enums import CheckOutcome, CheckSeverity, CheckType, FieldMutability, RunStatus
+from fmg.domain.exceptions import EmptyParameterSet, InvalidStateTransitionError
 
 # TODO: use the same exact naming everywhere within this project
 
-### --> manage what happens after a run is finished... 
+# TODO: Technical debt:
+# - Might want to consider creating multiple dataclasses for ModelRun: NewModelRun, ExistingModelRun, RunWithOutputs, etc., to avoid having to deal with optional fields and to make the code more explicit.
+
+
+### --> manage what happens after a run is finished...
 ###     for each method that performs some action on via RunRepository...!
 @dataclass(frozen=True)
 class FinancialModel:
@@ -16,6 +22,8 @@ class FinancialModel:
     description: str
     is_active: bool
     created_at: datetime
+
+
 ### write create / reconstitute...
 
 
@@ -29,46 +37,41 @@ class ModelVersion:
     created_at: datetime
 
     @classmethod
-    def create(
-        cls, 
-        model_id: int, 
-        version: str,
-        code_version: str
-    ) -> ModelVersion:
+    def create(cls, model_id: int, version: str, code_version: str) -> ModelVersion:
         """
         Used to create a new model version.
         """
         return cls(
-            version_id = None,
-            model_id = model_id,
-            version = version,
-            code_version = code_version,
-            approved = False,
-            created_at = datetime.now(timezone.utc)
+            version_id=None,
+            model_id=model_id,
+            version=version,
+            code_version=code_version,
+            approved=False,
+            created_at=datetime.now(UTC),
         )
-    
+
     @classmethod
     def reconstitute(
-            cls,
-            version_id: int,
-            model_id: int,
-            version: str,
-            code_version: str,
-            approved: bool,
-            created_at: datetime
+        cls,
+        version_id: int,
+        model_id: int,
+        version: str,
+        code_version: str,
+        approved: bool,
+        created_at: datetime,
     ) -> ModelVersion:
         """
         Used by the repository to reconstitute from DB
         """
         return cls(
-            version_id = version_id,
-            model_id = model_id,
-            version = version,
-            code_version = code_version,
-            approved = approved,
-            created_at = created_at
+            version_id=version_id,
+            model_id=model_id,
+            version=version,
+            code_version=code_version,
+            approved=approved,
+            created_at=created_at,
         )
-    
+
     def approve(self) -> ModelVersion:
         """
         Evolves the model version to approved state.
@@ -78,12 +81,8 @@ class ModelVersion:
             raise InvalidStateTransitionError(
                 f"The model version {self.version} for model {self.model_id} is already approved."
             )
-        
-        return replace(
-            self,
-            approved = True
-        )
 
+        return replace(self, approved=True)
 
 
 @dataclass(frozen=True)
@@ -95,7 +94,11 @@ class ParameterSet:
     approved: bool = field(metadata={"mutability": FieldMutability.CONTROLLED})
     created_at: datetime = field(metadata={"mutability": FieldMutability.IMMUTABLE})
 
-    def get_mutable_fields(self) -> dict[str, Any]: # this is a little contamination of the domain entity with the repository implementation, but it is a convenient way to get the fields that can be updated during the life cycle of a model run.
+    def get_mutable_fields(
+        self,
+    ) -> dict[
+        str, Any
+    ]:  # this is a little contamination of the domain entity with the repository implementation, but it is a convenient way to get the fields that can be updated during the life cycle of a model run.
         """
         Returns the field that be updated during the life cycle of a parameter set.
         """
@@ -106,49 +109,42 @@ class ParameterSet:
         }
 
     @classmethod
-    def create(
-            cls,
-            model_id: int,
-            parameter_version: str,
-            parameter_set: dict
-    ) -> ParameterSet:
+    def create(cls, model_id: int, parameter_version: str, parameter_set: dict) -> ParameterSet:
         """
         Used to create a new parameter set.
         """
         if not parameter_set:
-            raise EmptyParameterSet(
-                "parameter_set cannot be empty."
-            )
-        
+            raise EmptyParameterSet("parameter_set cannot be empty.")
+
         return cls(
-            parameter_version_id = None,
-            model_id = model_id,
-            parameter_version = parameter_version,
-            parameter_set = parameter_set,
-            approved = False,
-            created_at = datetime.now(timezone.utc)
+            parameter_version_id=None,
+            model_id=model_id,
+            parameter_version=parameter_version,
+            parameter_set=parameter_set,
+            approved=False,
+            created_at=datetime.now(UTC),
         )
-    
+
     @classmethod
     def reconstitute(
-            cls,
-            parameter_version_id: int,
-            model_id: int,
-            parameter_version: str,
-            parameter_set: dict,
-            approved: bool,
-            created_at: datetime
+        cls,
+        parameter_version_id: int,
+        model_id: int,
+        parameter_version: str,
+        parameter_set: dict,
+        approved: bool,
+        created_at: datetime,
     ) -> ParameterSet:
         """
         Used by the repository to reconstitute from DB
         """
         return cls(
-            parameter_version_id = parameter_version_id,
-            model_id = model_id,
-            parameter_version = parameter_version,
-            parameter_set = parameter_set,
-            approved = approved,
-            created_at = created_at
+            parameter_version_id=parameter_version_id,
+            model_id=model_id,
+            parameter_version=parameter_version,
+            parameter_set=parameter_set,
+            approved=approved,
+            created_at=created_at,
         )
 
     def approve(self) -> ParameterSet:
@@ -161,11 +157,7 @@ class ParameterSet:
                 f"The parameter version {self.parameter_version} for model {self.model_id} is already approved."
             )
 
-        return replace(
-            self,
-            approved = True
-        )
-
+        return replace(self, approved=True)
 
 
 @dataclass(frozen=True)
@@ -178,7 +170,6 @@ class CheckResult:
     details: dict[str, Any]
     started_at: datetime
     completed_at: datetime
-
 
 
 @dataclass(frozen=True)
@@ -194,49 +185,38 @@ class ModelRun:
     check_results: list[CheckResult] | None = field(default=None, metadata={"mutable": True})
     error_message: str | None = field(default=None, metadata={"mutable": True})
 
-    def get_mutable_fields(self) -> dict[str, Any]: # this is a little contamination of the domain entity with the repository implementation, but it is a convenient way to get the fields that can be updated during the life cycle of a model run.
+    def get_mutable_fields(
+        self,
+    ) -> dict[
+        str, Any
+    ]:  # this is a little contamination of the domain entity with the repository implementation, but it is a convenient way to get the fields that can be updated during the life cycle of a model run.
         """
         Returns the field that be updated during the life cycle of a model run.
         """
         return {
-            f.name: getattr(self, f.name)
-            for f in fields(self)
-            if f.metadata.get("mutable", False)
+            f.name: getattr(self, f.name) for f in fields(self) if f.metadata.get("mutable", False)
         }
 
     @classmethod
-    def create(
-            cls, 
-            model_id: int, 
-            model_version_id: int,
-            parameter_version_id: int
-    ) -> ModelRun:
+    def create(cls, model_id: int, model_version_id: int, parameter_version_id: int) -> ModelRun:
         return cls(
-            run_id = None,
-            model_id = model_id,
-            model_version_id = model_version_id,
-            parameter_version_id = parameter_version_id,
-            status = RunStatus.PENDING,
-            created_at = datetime.now(timezone.utc),
-            completed_at = None,
-            outputs = None,
-            check_results = None,
-            error_message = None
+            run_id=None,
+            model_id=model_id,
+            model_version_id=model_version_id,
+            parameter_version_id=parameter_version_id,
+            status=RunStatus.PENDING,
+            created_at=datetime.now(UTC),
+            completed_at=None,
+            outputs=None,
+            check_results=None,
+            error_message=None,
         )
-    
+
     @classmethod
-    def reconstitute(
-            cls,
-            **kwargs
-    ) -> ModelRun:
-        return cls(
-            **kwargs
-        )
-    
-    def apply_checks(
-            self, 
-            check_results: list[CheckResult]
-    ) -> ModelRun:
+    def reconstitute(cls, **kwargs) -> ModelRun:
+        return cls(**kwargs)
+
+    def apply_checks(self, check_results: list[CheckResult]) -> ModelRun:
         """
         Sets the check results and determines the final state of the run, returning a new instance of the class.
         """
@@ -259,17 +239,11 @@ class ModelRun:
             )
 
         return replace(
-            self,
-            check_results = check_results,
-            status = next_status,
-            completed_at = datetime.now(timezone.utc)
+            self, check_results=check_results, status=next_status, completed_at=datetime.now(UTC)
         )
-    
-    def apply_outputs(
-            self, 
-            outputs: dict[str, Any]
-    ) -> ModelRun:
-        
+
+    def apply_outputs(self, outputs: dict[str, Any]) -> ModelRun:
+
         next_state = RunStatus.OUTPUTS_GENERATED
         allowed_states = [RunStatus.RUNNING]
 
@@ -279,12 +253,8 @@ class ModelRun:
                 f"must be {allowed_states}."
             )
 
-        return replace(
-            self,
-            status = next_state,
-            outputs = outputs
-        )
-    
+        return replace(self, status=next_state, outputs=outputs)
+
     def mark_as_running(self) -> ModelRun:
 
         next_state = RunStatus.RUNNING
@@ -295,16 +265,10 @@ class ModelRun:
                 f"Model run cannot transition from state {self.status} to state {next_state}, "
                 f"must be {allowed_states}."
             )
-        
-        return replace(
-            self,
-            status = next_state
-        )
-        
-    def mark_as_checks_error(
-            self, 
-            error: str
-    ) -> ModelRun:
+
+        return replace(self, status=next_state)
+
+    def mark_as_checks_error(self, error: str) -> ModelRun:
 
         next_state = RunStatus.CHECKS_ERROR
         allowed_states = [RunStatus.OUTPUTS_GENERATED]
@@ -314,18 +278,12 @@ class ModelRun:
                 f"Model run cannot transition from state {self.status} to state {next_state}, "
                 f"must be {allowed_states}."
             )
-        
+
         return replace(
-            self,
-            status = RunStatus.CHECKS_ERROR,
-            error_message = error,
-            completed_at = datetime.now(timezone.utc)
+            self, status=RunStatus.CHECKS_ERROR, error_message=error, completed_at=datetime.now(UTC)
         )
 
-    def mark_as_failed(
-            self, 
-            error: str
-    ) -> ModelRun:
+    def mark_as_failed(self, error: str) -> ModelRun:
 
         next_state = RunStatus.FAILED
         allowed_states = [RunStatus.RUNNING]
@@ -335,10 +293,5 @@ class ModelRun:
                 f"Model run cannot transition from state {self.status} to state {next_state}, "
                 f"must be {allowed_states}."
             )
-        
-        return replace(
-            self,
-            status = next_state,
-            error_message = error,
-            completed_at = datetime.now(timezone.utc)
-        )
+
+        return replace(self, status=next_state, error_message=error, completed_at=datetime.now(UTC))
