@@ -38,12 +38,12 @@ dev = [
 DJANGO_SETTINGS_MODULE = "fmg.config.settings_test"
 testpaths = ["tests"]
 markers = [
-    "integration: e2e con celery worker e redis reali",
+    "integration: e2e with real celery worker and redis",
 ]
 addopts = "--reuse-db"
 env = [
-    "CELERY_BROKER_URL=redis://localhost:6379/1",
-    "CELERY_RESULT_BACKEND=redis://localhost:6379/1",
+    "D:CELERY_BROKER_URL=redis://localhost:6379/1",
+    "D:CELERY_RESULT_BACKEND=redis://localhost:6379/1",
 ]
 
 [tool.mypy]

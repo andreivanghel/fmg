@@ -36,12 +36,14 @@ def test_run_checks_end_to_end_real_broker(api_client, celery_worker, monkeypatc
 
     for _ in range(20):
         run = ModelRunORM.objects.get(run_id=run_id)
-        if run.status == RunStatus.COMPLETED.value:
+        if run.status in (RunStatus.COMPLETED.value, RunStatus.FAILED.value):
             break
         time.sleep(0.5)
     else:
         pytest.fail(
-            "il task non ha completato entro il timeout: possibile problema di broker/serializzazione"
+            "il task non ha raggiunto uno stato finale entro il timeout — problema di broker/dispatch"
         )
 
-    assert run.status == RunStatus.COMPLETED.value
+    assert run.status == RunStatus.COMPLETED.value, (
+        f"Run terminato con status={run.status}, error_message={run.error_message!r}"
+    )
