@@ -58,3 +58,5 @@ services:
 
 volumes:
   postgres_data:
+    external: true
+    name: fmg_postgres_data
