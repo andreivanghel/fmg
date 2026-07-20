@@ -27,8 +27,15 @@ dependencies = [
 [project.optional-dependencies]
 
 dev = [
+    "ruff",
+    "mypy",
+    "djangorestframework-stubs",
+    "types-redis",
+    "celery-types",
+    "faker",
     "pytest",
     "pytest-django",
+    "django-stubs",
     "pytest-cov",
     "factory-boy",
     "pytest-env",
