@@ -39,6 +39,7 @@ dev = [
     "pytest-cov",
     "factory-boy",
     "pytest-env",
+    "pandas-stubs",
 ]
 
 [tool.pytest.ini_options]
