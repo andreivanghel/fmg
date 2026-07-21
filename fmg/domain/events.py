@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
 
+from typing_extensions import override
+
 
 class EventType(StrEnum):
     CHECKS_REQUESTED = "checks_requested"
@@ -42,6 +44,7 @@ class DomainEvent(ABC):
 class ChecksRequested(DomainEvent):
     run_id: int
 
+    @override
     @property
     def event_type(self) -> EventType:
         return EventType.CHECKS_REQUESTED

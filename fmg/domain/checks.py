@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 
+from typing_extensions import override
+
 from fmg.domain.entities import CheckResult
 from fmg.domain.enums import CheckOutcome, CheckSeverity, CheckType
 
@@ -40,10 +42,12 @@ class OutputNotEmptyCheck(Check):
     check_type = CheckType.GENERIC
     severity = CheckSeverity.ERROR
 
+    @override
     @property
     def name(self) -> str:
         return "output_not_empty"
 
+    @override
     def _execute(self, outputs: dict) -> tuple[CheckOutcome, str, dict]:
 
         if outputs and len(outputs) > 0:

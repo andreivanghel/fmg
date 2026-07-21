@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Any
 
 from django.db import IntegrityError, OperationalError, ProgrammingError
+from typing_extensions import override
 
 from fmg.application.exceptions import (
     EarlyParamsSetIdAssignmentError,
@@ -16,6 +17,7 @@ from fmg.infra.exceptions import DatabaseError
 
 
 class DjangoParametersRepository(IParametersRepository):
+    @override
     def get(self, parameter_set_id: int) -> ParameterSet:
         """
         Fetch an existing parameter set by its ID and associated model ID.
@@ -45,6 +47,7 @@ class DjangoParametersRepository(IParametersRepository):
 
         # let other exceptions propagate: they are likely programming errors that should be fixed in the code, not handled at runtime.
 
+    @override
     def save(self, parameter_set: ParameterSet) -> None:
         """
         Persist an updated version of an existing parameter set via UPDATE.
@@ -71,6 +74,7 @@ class DjangoParametersRepository(IParametersRepository):
                 f"Parameter set {parameter_set.parameter_version_id} not found during conditional update."
             )
 
+    @override
     def save_if_status(self, parameter_set: ParameterSet, expected_status: bool) -> bool:
         """
         Atomically update an existing parameter set if its approved status matches the expected status.
@@ -112,6 +116,7 @@ class DjangoParametersRepository(IParametersRepository):
         # Parameter set exists but status had already changed - race condition, expected
         return False
 
+    @override
     def create(self, parameter_set: ParameterSet) -> int:
         """
         Persist a new parameter set via INSERT.

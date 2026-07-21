@@ -5,6 +5,7 @@ import pandas as pd
 import yaml
 import yfinance as yf
 from numpy.typing import NDArray
+from typing_extensions import override
 
 from fmg.domain.financial_model_executor import FinancialModelExecutor
 
@@ -12,6 +13,7 @@ yf.set_tz_cache_location("/tmp/py-yfinance-cache")
 
 
 class PortfolioVaR(FinancialModelExecutor):
+    @override
     def _run(self, params: dict) -> dict:
 
         confidence_levels = params["confidence_levels"]
@@ -100,5 +102,6 @@ class PortfolioVaR(FinancialModelExecutor):
 
         return var_table
 
+    @override
     def _specific_checks(self):
         return super()._specific_checks()

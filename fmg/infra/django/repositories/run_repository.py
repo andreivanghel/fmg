@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Any
 
 from django.db import IntegrityError, OperationalError, ProgrammingError
+from typing_extensions import override
 
 from fmg.application.exceptions import (
     EarlyRunIdAssignmentError,
@@ -24,6 +25,7 @@ class DjangoRunRepository(IRunRepository):
     # Public interface
     # ------------------------------------------------------------------------------------------
 
+    @override
     def get(self, run_id: int) -> ModelRun:
         """
         Fetch an existing model run by its ID.
@@ -56,6 +58,7 @@ class DjangoRunRepository(IRunRepository):
 
         # let other exceptions propagate: they are likely programming errors that should be fixed in the code, not handled at runtime.
 
+    @override
     def create(self, run: ModelRun) -> int:
         """
         Persist a new run via INSERT.
@@ -93,6 +96,7 @@ class DjangoRunRepository(IRunRepository):
             # Infrastructure-level error
             raise DatabaseError(f"Database error while creating run: {e}") from e
 
+    @override
     def save(self, run: ModelRun) -> None:
         """
         Persist an updated version of an existing model run via UPDATE.
@@ -122,6 +126,7 @@ class DjangoRunRepository(IRunRepository):
             # No run was found in DB.
             raise RunNotFoundError(f"Run {run.run_id} not found during conditional update.")
 
+    @override
     def save_if_status(self, run: ModelRun, expected_status: RunStatus) -> bool:
         """
         Persist the run if its current status matches expected_status.

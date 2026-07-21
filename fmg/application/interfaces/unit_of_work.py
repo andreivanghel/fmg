@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 
+# TODO: this is a duplicate of the IUnitOfWork interface in fmg/application/interfaces/unit_of_work.py.
+# We should remove one of them and use the other consistently across the codebase.
+
 
 class IUnitOfWork(ABC):
     @abstractmethod

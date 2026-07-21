@@ -48,6 +48,10 @@ class IParametersRepository(ABC):
         pass
 
     @abstractmethod
+    def save_if_status(self, parameter_set: ParameterSet, expected_status: bool) -> bool:
+        pass
+
+    @abstractmethod
     def get(self, parameter_set_id: int) -> ParameterSet:
         pass
 
