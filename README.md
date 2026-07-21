@@ -2,6 +2,7 @@
 
 ![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![CI](https://github.com/andreivanghel/fmg/actions/workflows/ci.yml/badge.svg)
 
 A governance engine for financial models: implement a model once, register a versioned set of parameters, trigger a run — and let the engine handle the rest of the lifecycle automatically.
 
