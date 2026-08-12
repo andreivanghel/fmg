@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:15
-    container_name: cmgs_db
+    container_name: fmg_prod_db
     restart: always
     env_file:
       - .env
@@ -17,15 +17,17 @@ services:
 
   redis:
     image: redis:7
-    container_name: cmgs_redis
+    container_name: fmg_prod_redis
     restart: always
     ports:
       - "6379:6379"
 
   celery_worker:
-    build: .
+    build:
+      context: .
+      target: runtime
     restart: always
-    command: celery -A config worker --loglevel=info
+    command: celery -A fmg.infra.celery.app worker --loglevel=info
     env_file:
       - .env
     depends_on:
@@ -33,10 +35,12 @@ services:
       - db
 
   web:
-    build: .
+    build:
+      context: .
+      target: runtime
     restart: always
-    # Gunicorn with 4 workers for concurrency; adjust the number of workers based on your server's CPU cores
-    command: sh -c "python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4"
+    # Gunicorn with 4 workers for concurrency; adjust based on your server's CPU cores
+    command: sh -c "python manage.py migrate && gunicorn fmg.wsgi:application --bind 0.0.0.0:8000 --workers 4"
     env_file:
       - .env
     ports:

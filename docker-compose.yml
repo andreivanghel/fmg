@@ -3,13 +3,13 @@ name: fmg_dev
 services:
   db:
     image: postgres:15
-    container_name: cmgs_db
+    container_name: fmg_dev_db
     env_file:
       - .env
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # i dati persistono tra restart
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d cmgs"]
       interval: 5s
@@ -18,7 +18,7 @@ services:
 
   redis:
     image: redis:7
-    container_name: cmgs_redis
+    container_name: fmg_dev_redis
     ports:
       - "6379:6379"
     healthcheck:
@@ -28,10 +28,12 @@ services:
       retries: 5
 
   celery_worker:
-    build: . # Usa lo stesso Dockerfile della tua app Python
+    build:
+      context: .
+      target: dev
     command: celery -A fmg.infra.celery.app worker --loglevel=info
     volumes:
-      - .:/code # Se mappi il codice in locale per i cambi a caldo
+      - .:/code
     depends_on:
       - redis
       - db
@@ -39,7 +41,9 @@ services:
       - .env
 
   web:
-    build: .
+    build:
+      context: .
+      target: dev
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/code
@@ -55,8 +59,5 @@ services:
       celery_worker:
         condition: service_started
 
-
 volumes:
   postgres_data:
-    external: true
-    name: fmg_postgres_data
