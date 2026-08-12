@@ -42,6 +42,11 @@ dev = [
     "pandas-stubs",
 ]
 
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.2",
+]
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "fmg.config.settings_test"
 testpaths = ["tests"]

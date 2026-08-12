@@ -1,44 +1,51 @@
 # ============================================================
-# FMG — multi-stage Dockerfile
+# FMG — multi-stage Dockerfile (uv-managed dependencies)
 #
 # Targets:
-#   dev      -> used by fmg_dev / fmg_test compose (bind-mounted
-#               code, dev+test extras installed: pytest/ruff/mypy)
-#   runtime  -> used by prod compose (immutable, no dev deps,
-#               non-root user)
+#   dev      -> fmg_dev / fmg_test compose (bind-mounted code,
+#               "dev" extra installed: pytest/ruff/mypy)
+#   runtime  -> prod compose (immutable, no dev deps, non-root)
 #
+# ATTENZIONE al bind mount: uv per default mette il venv dentro
+# /code/.venv. Ma fmg_dev/fmg_test montano `.:/code` — quindi il
+# venv costruito nell'immagine verrebbe NASCOSTO dal mount al
+# primo avvio (il tuo host non ha quel .venv, quindi Docker
+# monta una cartella "vuota" sopra). Per questo UV_PROJECT_ENVIRONMENT
+# punta a /opt/venv, FUORI da /code — così il mount non lo tocca.
 # ============================================================
 
-# ---- base: shared runtime OS packages only ----
 FROM python:3.11.9-slim AS base
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    PATH="/opt/venv/bin:$PATH"
 WORKDIR /code
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
-# ---- builder: adds compilers, installs dev+test deps ----
-FROM base AS builder
+# ---- dev: compilers + extra "dev" completo — usato da fmg_dev/fmg_test ----
+FROM base AS dev
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         libpq-dev \
     && rm -rf /var/lib/apt/lists/*
-COPY pyproject.toml /code/
-RUN pip install --no-cache-dir --user -e ".[dev]"
-ENV PATH=/root/.local/bin:$PATH
-
-# ---- dev: what fmg_dev / fmg_test actually run ----
-FROM builder AS dev
+COPY pyproject.toml uv.lock /code/
+RUN uv sync --frozen --extra dev --no-install-project
 COPY . /code/
-# code gets overlaid by the bind mount (.:/code) in fmg_dev/fmg_test —
-# this COPY just keeps the image runnable standalone too (e.g. in CI)
+RUN uv sync --frozen --extra dev
+# la COPY sopra viene comunque sovrascritta dal bind mount .:/code in
+# fmg_dev/fmg_test — serve solo a rendere l'immagine eseguibile da sola
 
-# ---- runtime: slim, no dev deps, non-root — what prod runs ----
+# ---- runtime: slim, no dev deps, non-root — usato da prod ----
 FROM base AS runtime
 RUN useradd --create-home --shell /bin/bash appuser
-COPY pyproject.toml /code/
-RUN pip install --no-cache-dir .
+COPY pyproject.toml uv.lock /code/
+RUN uv sync --frozen --no-install-project
 COPY --chown=appuser:appuser . /code/
+RUN uv sync --frozen
 USER appuser
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]

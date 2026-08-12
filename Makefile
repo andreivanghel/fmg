@@ -6,13 +6,13 @@
 # ---------- Code quality (local) ----------
 
 lint:
-	ruff check .
+	uv run ruff check .
 
 format:
-	ruff format .
+	uv run ruff format .
 
 typecheck:
-	mypy .
+	uv run mypy .
 
 check: lint typecheck test-unit
 	@echo "✅ Lint + typecheck + unit test passed"
@@ -20,7 +20,7 @@ check: lint typecheck test-unit
 # ---------- Test (Testing Docker) ----------
 
 test-unit:
-	pytest tests/unit -v
+	uv run pytest tests/unit -v
 
 test-smoke:
 	docker compose -f docker-compose.test.yml build test
