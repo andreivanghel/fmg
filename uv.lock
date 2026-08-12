@@ -865,7 +865,7 @@ dependencies = [
     { name = "yfinance" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "celery-types" },
     { name = "django-stubs" },
@@ -874,6 +874,7 @@ dev = [
     { name = "faker" },
     { name = "mypy" },
     { name = "pandas-stubs" },
+    { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-django" },
@@ -882,40 +883,36 @@ dev = [
     { name = "types-redis" },
 ]
 
-[package.dev-dependencies]
-dev = [
-    { name = "pre-commit" },
-]
-
 [package.metadata]
 requires-dist = [
     { name = "celery" },
-    { name = "celery-types", marker = "extra == 'dev'" },
     { name = "django", specifier = ">=5.2" },
     { name = "django-filter" },
-    { name = "django-stubs", marker = "extra == 'dev'" },
     { name = "djangorestframework" },
-    { name = "djangorestframework-stubs", marker = "extra == 'dev'" },
-    { name = "factory-boy", marker = "extra == 'dev'" },
-    { name = "faker", marker = "extra == 'dev'" },
-    { name = "mypy", marker = "extra == 'dev'" },
-    { name = "pandas-stubs", marker = "extra == 'dev'" },
     { name = "psycopg2-binary" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pytest-cov", marker = "extra == 'dev'" },
-    { name = "pytest-django", marker = "extra == 'dev'" },
-    { name = "pytest-env", marker = "extra == 'dev'" },
     { name = "python-dotenv" },
     { name = "pyyaml" },
     { name = "redis" },
-    { name = "ruff", marker = "extra == 'dev'" },
-    { name = "types-redis", marker = "extra == 'dev'" },
     { name = "yfinance" },
 ]
-provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pre-commit", specifier = ">=4.6.2" }]
+dev = [
+    { name = "celery-types" },
+    { name = "django-stubs" },
+    { name = "djangorestframework-stubs" },
+    { name = "factory-boy" },
+    { name = "faker" },
+    { name = "mypy" },
+    { name = "pandas-stubs" },
+    { name = "pre-commit", specifier = ">=4.6.2" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "pytest-django" },
+    { name = "pytest-env" },
+    { name = "ruff" },
+    { name = "types-redis" },
+]
 
 [[package]]
 name = "identify"

@@ -104,9 +104,7 @@ class PortfolioVaR(FinancialModelExecutor):
 
         config = self._load_config()
         prices = self._fetch_data(config["tickers"], lookback_days)
-        portfolio_returns = self._compute_portfolio_returns(
-            prices, np.array(config["weights"])
-        )
+        portfolio_returns = self._compute_portfolio_returns(prices, np.array(config["weights"]))
         var_table = self._compute_var(portfolio_returns, confidence_levels)
 
         return {
