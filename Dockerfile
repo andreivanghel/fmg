@@ -34,9 +34,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 COPY pyproject.toml uv.lock /code/
-RUN uv sync --frozen --extra dev --no-install-project
+RUN uv sync --frozen --no-install-project
 COPY . /code/
-RUN uv sync --frozen --extra dev
+RUN uv sync --frozen
 # la COPY sopra viene comunque sovrascritta dal bind mount .:/code in
 # fmg_dev/fmg_test — serve solo a rendere l'immagine eseguibile da sola
 
@@ -44,8 +44,8 @@ RUN uv sync --frozen --extra dev
 FROM base AS runtime
 RUN useradd --create-home --shell /bin/bash appuser
 COPY pyproject.toml uv.lock /code/
-RUN uv sync --frozen --no-install-project
+RUN uv sync --frozen --no-install-project --no-dev
 COPY --chown=appuser:appuser . /code/
-RUN uv sync --frozen
+RUN uv sync --frozen --no-dev
 USER appuser
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]

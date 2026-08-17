@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  contents: read
+
 env:
   DJANGO_SETTINGS_MODULE: fmg.config.settings_test
   DEBUG: "True"
@@ -26,13 +29,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v3
         with:
-          python-version: "3.11.9"
-          cache: 'pip'
-      - run: pip install -e ".[dev]"
-      - run: ruff check .
-      - run: ruff format --check .
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
 
   # ---------- 2. Typecheck ----------
   typecheck:
@@ -40,12 +42,11 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v3
         with:
-          python-version: "3.11.9"
-          cache: 'pip'
-      - run: pip install -e ".[dev]"
-      - run: mypy .
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run mypy .
 
   # ---------- 3. Unit test ----------
   test-unit:
@@ -53,12 +54,11 @@ jobs:
     needs: typecheck
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v3
         with:
-          python-version: "3.11.9"
-          cache: 'pip'
-      - run: pip install -e ".[dev]"
-      - run: pytest tests/unit -v
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run pytest tests/unit -v
 
   # ---------- 4. Smoke + Integration (real services) ----------
   test-smoke-integration:
@@ -87,17 +87,16 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v3
         with:
-          python-version: "3.11.9"
-          cache: 'pip'
-      - run: pip install -e ".[dev]"
+          enable-cache: true
+      - run: uv sync --frozen
       - name: Run migrations
-        run: python manage.py migrate
+        run: uv run python manage.py migrate
       - name: Run smoke tests
-        run: pytest tests/smoke -v
+        run: uv run pytest tests/smoke -v
       - name: Run integration tests
-        run: pytest tests/integration -v
+        run: uv run pytest tests/integration -v
 
   # ---------- 5. Syntax validation of compose files ----------
   validate-compose:
