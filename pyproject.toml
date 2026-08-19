@@ -22,6 +22,7 @@ dependencies = [
     "python-dotenv",
     "psycopg2-binary",
     "PyYAML",
+    "gunicorn>=26.1.0",
 ]
 
 [dependency-groups]
