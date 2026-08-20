@@ -1,9 +1,0 @@
-tickers:
-  - AAPL
-  - MSFT
-  - GOOGL
-
-weights:
-  - 0.4
-  - 0.35
-  - 0.25

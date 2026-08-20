@@ -1,0 +1,88 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["fmg*"]
+
+[project]
+name = "fmg"
+version = "0.1.0"
+description = "Financial model governance engine."
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "django>=5.2",
+    "djangorestframework",
+    "django-filter",
+    "celery",
+    "redis",
+    "yfinance",
+    "python-dotenv",
+    "psycopg2-binary",
+    "PyYAML",
+    "gunicorn>=26.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "mypy",
+    "djangorestframework-stubs",
+    "types-redis",
+    "celery-types",
+    "faker",
+    "pytest",
+    "pytest-django",
+    "django-stubs",
+    "pytest-cov",
+    "factory-boy",
+    "pytest-env",
+    "pandas-stubs",
+    "pre-commit>=4.6.2",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "fmg.config.settings_test"
+testpaths = ["tests"]
+markers = [
+    "integration: e2e with real celery worker and redis",
+]
+addopts = "--reuse-db"
+env = [
+    "D:CELERY_BROKER_URL=redis://localhost:6379/1",
+    "D:CELERY_RESULT_BACKEND=redis://localhost:6379/1",
+]
+
+[tool.mypy]
+python_version = "3.11"
+plugins = ["mypy_django_plugin.main"]
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+exclude = ["migrations/"]
+
+[[tool.mypy.overrides]]
+module = [
+    "yfinance.*",
+    "celery.*",
+]
+ignore_missing_imports = true
+
+
+[tool.django-stubs]
+django_settings_module = "fmg.config.settings"
+
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["migrations", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4"]  # pyflakes, pycodestyle, isort, upgrades, bugbear, comprehensions
+ignore = ["E501"]  # la lunghezza riga la gestisce già il formatter
+
+[tool.ruff.format]
+quote-style = "double"

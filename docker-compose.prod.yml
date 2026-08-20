@@ -1,0 +1,71 @@
+name: fmg_prod
+
+services:
+  db:
+    image: postgres:15
+    container_name: fmg_prod_db
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: fmg_prod_redis
+    restart: always
+
+  celery_worker:
+    build:
+      context: .
+      target: runtime
+    restart: always
+    command: celery -A fmg.infra.celery.app worker --loglevel=info
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+
+  web:
+    build:
+      context: .
+      target: runtime
+    restart: always
+    # Gunicorn with 4 workers for concurrency; adjust based on your server's CPU cores
+    command: sh -c "python manage.py migrate && gunicorn fmg.config.wsgi:application --bind 0.0.0.0:8000 --workers 4"
+    env_file:
+      - .env
+    expose:
+      - "8000"   # raggiungibile SOLO dagli altri container (Caddy), non da internet
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      celery_worker:
+        condition: service_started
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: fmg_prod_caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:

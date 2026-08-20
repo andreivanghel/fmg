@@ -1,0 +1,43 @@
+name: fmg_test
+
+services:
+  db:
+    image: postgres:15
+    container_name: fmg_test_db
+    env_file:
+      - .env.test
+    ports:
+      - "5433:5432"   # different from dev (5432) to avoid conflicts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    tmpfs:
+      - /var/lib/postgresql/data   # data only in RAM
+
+  redis:
+    image: redis:7
+    container_name: fmg_test_redis
+    ports:
+      - "6380:6379"   # different from dev (6379) to avoid conflicts
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  test:
+    build:
+      context: .
+      target: dev
+    command: pytest
+    env_file:
+      - .env.test
+    environment:
+      DJANGO_SETTINGS_MODULE: fmg.config.settings_test
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy

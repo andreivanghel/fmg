@@ -1,21 +1,63 @@
+name: fmg_dev
+
 services:
   db:
     image: postgres:15
-    container_name: cmgs_db
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: cmgs
+    container_name: fmg_dev_db
+    env_file:
+      - .env
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # i dati persistono tra restart
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d cmgs"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   redis:
     image: redis:7
-    container_name: cmgs_redis
+    container_name: fmg_dev_redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  celery_worker:
+    build:
+      context: .
+      target: dev
+    command: celery -A fmg.infra.celery.app worker --loglevel=info
+    volumes:
+      - .:/code
+    depends_on:
+      - redis
+      - db
+    env_file:
+      - .env
+
+  web:
+    build:
+      context: .
+      target: dev
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/code
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      celery_worker:
+        condition: service_started
 
 volumes:
   postgres_data:
