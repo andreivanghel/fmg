@@ -38,7 +38,7 @@ services:
       target: runtime
     restart: always
     # Gunicorn with 4 workers for concurrency; adjust based on your server's CPU cores
-    command: sh -c "python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4"
+    command: sh -c "python manage.py migrate && gunicorn fmg.config.wsgi:application --bind 0.0.0.0:8000 --workers 4"
     env_file:
       - .env
     expose:
