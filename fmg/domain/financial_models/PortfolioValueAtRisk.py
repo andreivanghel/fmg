@@ -42,7 +42,7 @@ class PortfolioVaR(FinancialModelExecutor):
         }
 
     def _load_config(self) -> Any:
-        with open("domain/financial_models/portfolio_var_config.yaml") as f:
+        with open("fmg/domain/financial_models/portfolio_var_config.yaml") as f:
             return yaml.safe_load(f)
 
     def _fetch_data(self, tickers: list[str], lookback_days: int) -> pd.DataFrame:
