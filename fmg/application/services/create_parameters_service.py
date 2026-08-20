@@ -17,7 +17,7 @@ class CreateParametersSetService:
 
         all_models = self.model_repository.get_all_models_ids()
         if model_id not in all_models:
-            raise ModelNotFoundError(f"Model with ID {model_id} not found.")
+            raise ModelNotFoundError(model_id=model_id)
 
         p_set = ParameterSet.create(
             model_id=model_id, parameter_version=parameter_version, parameter_set=parameter_set

@@ -11,7 +11,12 @@ class ModelNotFoundError(ApplicationError):
     Raised when a model is not found within a ModelFactory.
     """
 
-    pass
+    def __init__(self, model_id: int, model_version_id: int | None = None) -> None:
+        self.model_id = model_id
+        self.model_version_id = model_version_id
+        super().__init__(
+            f"Model with id={model_id} and version_id={model_version_id} was not found."
+        )
 
 
 class RunNotFoundError(ApplicationError):
