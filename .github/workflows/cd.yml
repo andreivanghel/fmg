@@ -15,10 +15,6 @@ jobs:
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main'
-    # Ambiente GitHub dedicato: i secret sotto NON sono repo-wide, esistono
-    # solo per i job che dichiarano "environment: production". Da Settings
-    # -> Environments puoi anche richiedere un'approvazione manuale prima
-    # che questo job parta, se un domani lavori in team.
     environment: production
     steps:
       - name: Deploy to VM over SSH
@@ -32,11 +28,5 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "$VM_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-          ssh -i ~/.ssh/deploy_key "$VM_USER@$VM_HOST" '
-            set -e
-            cd ~/fmg &&
-            git pull origin main &&
-            docker compose -f docker-compose.prod.yml build &&
-            docker compose -f docker-compose.prod.yml up -d &&
-            docker image prune -f
-          '
+          # After the SSH connection, the VM executes the commands to pull the latest code and restart the services
+          ssh -i ~/.ssh/deploy_key "$VM_USER@$VM_HOST"
