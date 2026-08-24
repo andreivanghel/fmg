@@ -55,3 +55,19 @@ class RunInfoSerializer(serializers.Serializer):
     outputs = serializers.DictField(allow_null=True, read_only=True)
     check_results = CheckResultSerializer(many=True, allow_null=True, read_only=True)
     error_message = serializers.CharField(allow_null=True, read_only=True)
+
+
+class RunSummarySerializer(serializers.Serializer):
+    """Lighter than RunInfoSerializer - for the runs list. No outputs/check_results:
+    those can be non-trivial payloads and the list view doesn't need them per row,
+    only the detail view does."""
+
+    run_id = serializers.IntegerField(read_only=True)
+    model_id = serializers.IntegerField(read_only=True)
+    model_version_id = serializers.IntegerField(read_only=True)
+    parameter_version_id = serializers.IntegerField(read_only=True)
+    status = serializers.ChoiceField(
+        choices=[(s.value, s.value) for s in RunStatus], read_only=True
+    )
+    created_at = serializers.DateTimeField(read_only=True)
+    completed_at = serializers.DateTimeField(allow_null=True, read_only=True)
