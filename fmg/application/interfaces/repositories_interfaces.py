@@ -36,6 +36,11 @@ class IRunRepository(ABC):
         Returns True if the update is completed, and False otherwise"""
         pass
 
+    @abstractmethod
+    def list_runs(self, limit: int = 20, offset: int = 0) -> list[ModelRun]:
+        """Return the most recent runs, newest first, paginated."""
+        pass
+
 
 class IParametersRepository(ABC):
     @abstractmethod
