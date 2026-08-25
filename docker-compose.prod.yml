@@ -19,6 +19,11 @@ services:
     image: redis:7
     container_name: fmg_prod_redis
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   celery_worker:
     build:
@@ -29,8 +34,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - redis
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   web:
     build:
@@ -47,9 +54,15 @@ services:
       db:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       celery_worker:
         condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/', timeout=3); assert r.status == 200"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   caddy:
     image: caddy:2-alpine
@@ -63,7 +76,8 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - web
+      web:
+        condition: service_healthy
 
 volumes:
   postgres_data:

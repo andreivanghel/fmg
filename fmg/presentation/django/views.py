@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -12,6 +13,17 @@ from fmg.presentation.django.serializers import (
     RunInfoSerializer,
     StartRunRequestSerializer,
 )
+
+MAX_LIST_LIMIT = 100
+DEFAULT_LIST_LIMIT = 20
+
+
+def health_check(request: Request) -> JsonResponse:
+    return JsonResponse({"status": "ok"})
+
+
+class RunsView(APIView):
+    """Collection endpoint for runs: POST creates a new run, GET lists recent runs."""
 
 
 class StartRunView(APIView):

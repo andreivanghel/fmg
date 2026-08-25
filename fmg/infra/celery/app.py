@@ -9,7 +9,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "fmg.config.settings")
 app = Celery(
     "central_model_governance_service",
     broker=os.getenv(
-        "CELERY_BROKER_URL", "redis://cmgs_redis:6379/0"
+        "CELERY_BROKER_URL",
+        "redis://cmgs_redis:6379/0",  # TODO: this is outdated
     ),  # Usa env var se c'è, altrimenti localhost
     backend=os.getenv("CELERY_RESULT_BACKEND", "redis://cmgs_redis:6379/0"),
     include=["fmg.infra.celery.tasks"],
