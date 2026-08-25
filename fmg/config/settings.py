@@ -20,7 +20,7 @@ load_dotenv()  # no-op if variables are already set in the environment
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent  # TODO: generalize
 
 
 # Helper function to get environment variables and raise an error if not found
@@ -76,7 +76,7 @@ ROOT_URLCONF = "fmg.config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "presentation" / "django" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
