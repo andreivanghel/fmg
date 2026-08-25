@@ -21,7 +21,6 @@ from django.urls import include, path
 from fmg.presentation.django.views import health_check
 
 urlpatterns = [
-    path("", include("fmg.presentation.django.htmx_urls")),
     path("health/", health_check),
     path("admin/", admin.site.urls),
     path("api/v1/", include("fmg.presentation.django.urls")),
