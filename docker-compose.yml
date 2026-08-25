@@ -5,13 +5,13 @@ services:
     image: postgres:15
     container_name: fmg_dev_db
     env_file:
-      - .env
+      - .env.test
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d cmgs"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -38,7 +38,7 @@ services:
       - redis
       - db
     env_file:
-      - .env
+      - .env.test
 
   web:
     build:
@@ -48,7 +48,7 @@ services:
     volumes:
       - .:/code
     env_file:
-      - .env
+      - .env.test
     ports:
       - "8000:8000"
     depends_on:
