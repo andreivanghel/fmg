@@ -28,5 +28,9 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "$VM_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-          # After the SSH connection, the VM executes the commands to pull the latest code and restart the services
-          ssh -i ~/.ssh/deploy_key "$VM_USER@$VM_HOST"
+          ssh -i ~/.ssh/deploy_key "$VM_USER@$VM_HOST" << 'EOF'
+            cd fmg/
+            git pull origin main
+
+            sudo docker compose -f docker-compose.prod.yml up -d --build --wait
+          EOF
