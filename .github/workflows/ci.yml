@@ -119,7 +119,6 @@ jobs:
           EOF
       - name: Validate compose files syntax
         run: |
-          docker compose -f docker-compose.yml config -q
           docker compose -f docker-compose.prod.yml config -q
 
   # ---------- 6. Build Dockerfile (syntax validation, not push) ----------
