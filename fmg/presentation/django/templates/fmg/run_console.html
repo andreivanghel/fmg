@@ -1,5 +1,14 @@
 {% extends "fmg/base.html" %}
 {% block content %}
+<style>
+  form.htmx-request #run-button {
+    background-color: #10b981;
+    color: #f8fafc;
+  }
+  form.htmx-request .run-label-idle { display: none; }
+  .run-label-active { display: none; }
+  form.htmx-request .run-label-active { display: inline; }
+</style>
 <div class="max-w-3xl mx-auto p-6 md:p-10">
   <header class="mb-10">
     <div class="flex items-center gap-2 text-sm text-neutral-500 mb-1">
@@ -36,8 +45,9 @@
         </select>
       </div>
     </div>
-    <button type="submit" class="w-full bg-neutral-100 text-neutral-900 rounded-lg py-2.5 text-sm font-medium hover:bg-white transition">
-      Run model
+    <button type="submit" id="run-button" class="w-full bg-neutral-100 text-neutral-900 rounded-lg py-2.5 text-sm font-medium hover:bg-white transition-colors duration-200">
+      <span class="run-label-idle">Run model</span>
+      <span class="run-label-active">Running…</span>
     </button>
   </form>
 

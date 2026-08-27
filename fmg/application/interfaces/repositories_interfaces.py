@@ -41,6 +41,11 @@ class IRunRepository(ABC):
         """Return the most recent runs, newest first, paginated."""
         pass
 
+    @abstractmethod
+    def count_runs(self) -> int:
+        """Total number of persisted runs (for pagination)."""
+        pass
+
 
 class IParametersRepository(ABC):
     @abstractmethod

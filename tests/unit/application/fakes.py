@@ -96,6 +96,10 @@ class InMemoryRunRepository(IRunRepository):
         assert self._run is not None, "InMemoryRunRepository: no run stored in memory"
         return [self._run]  # Return a list with the single run for testing purposes
 
+    @override
+    def count_runs(self) -> int:
+        return 1 if self._run is not None else 0
+
 
 class FakeTaskDispatcher(ITaskDispatcher):
     def __init__(self):

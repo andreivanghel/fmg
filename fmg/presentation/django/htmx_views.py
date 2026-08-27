@@ -1,3 +1,5 @@
+import math
+
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
@@ -20,6 +22,8 @@ STAGE_LABELS = ["Pending", "Running", "Outputs", "Checks"]
 
 # Order used to compute how far along the main progress bar a non-terminal run is.
 _STAGE_ORDER = [RunStatus.PENDING, RunStatus.RUNNING, RunStatus.OUTPUTS_GENERATED]
+
+RUNS_PAGE_SIZE = 10
 
 
 def _stage_index(run_status: RunStatus) -> int:
@@ -103,8 +107,33 @@ def _render_status(request: HttpRequest, run: ModelRun) -> HttpResponse:
 
 
 def run_history(request: HttpRequest) -> HttpResponse:
-    runs = _make_repository().list_runs(limit=20)
-    return render(request, "fmg/partials/_history.html", {"runs": runs})
+    """Paginated, RUNS_PAGE_SIZE per page, newest first."""
+    try:
+        page = int(request.GET.get("page", 1))
+    except ValueError:
+        page = 1
+    page = max(page, 1)
+
+    repository = _make_repository()
+    total = repository.count_runs()
+    total_pages = max(1, math.ceil(total / RUNS_PAGE_SIZE))
+    page = min(page, total_pages)
+
+    offset = (page - 1) * RUNS_PAGE_SIZE
+    runs = repository.list_runs(limit=RUNS_PAGE_SIZE, offset=offset)
+
+    return render(
+        request,
+        "fmg/partials/_history.html",
+        {
+            "runs": runs,
+            "page": page,
+            "total_pages": total_pages,
+            "total": total,
+            "has_prev": page > 1,
+            "has_next": page < total_pages,
+        },
+    )
 
 
 def run_detail(request: HttpRequest, run_id: int) -> HttpResponse:

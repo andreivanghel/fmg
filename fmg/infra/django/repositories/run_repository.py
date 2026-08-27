@@ -84,6 +84,23 @@ class DjangoRunRepository(IRunRepository):
             raise DatabaseError(f"SQL error while listing runs: {e}") from e
 
     @override
+    def count_runs(self) -> int:
+        """
+        Count the total number of persisted runs.
+
+        Returns:
+            Total run count.
+
+        Raises:
+            DatabaseError: If a database error is encountered while counting runs.
+        """
+        try:
+            return ModelRunORM.objects.count()
+
+        except OperationalError as e:
+            raise DatabaseError(f"Database error while counting runs: {e}") from e
+
+    @override
     def create(self, run: ModelRun) -> int:
         """
         Persist a new run via INSERT.

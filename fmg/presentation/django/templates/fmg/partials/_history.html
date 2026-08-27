@@ -1,5 +1,8 @@
 <div class="border border-neutral-800 rounded-xl bg-neutral-900 overflow-hidden">
-  <div class="px-6 py-3 border-b border-neutral-800 text-xs text-neutral-500">Run history</div>
+  <div class="px-6 py-3 border-b border-neutral-800 flex items-center justify-between text-xs text-neutral-500">
+    <span>Run history</span>
+    <span>{{ total }} total</span>
+  </div>
   <div>
     {% for run in runs %}
       <button
@@ -23,4 +26,30 @@
       <div class="px-6 py-6 text-sm text-neutral-500 text-center">No runs yet.</div>
     {% endfor %}
   </div>
+
+  {% if total_pages > 1 %}
+  <div class="px-6 py-3 border-t border-neutral-800 flex items-center justify-between text-xs text-neutral-500">
+    {% if has_prev %}
+      <button
+        hx-get="{% url 'htmx-run-history' %}?page={{ page|add:'-1' }}"
+        hx-target="#run-history" hx-swap="innerHTML"
+        class="hover:text-neutral-200 transition"
+      >&larr; Prev</button>
+    {% else %}
+      <span class="opacity-30">&larr; Prev</span>
+    {% endif %}
+
+    <span>Page {{ page }} of {{ total_pages }}</span>
+
+    {% if has_next %}
+      <button
+        hx-get="{% url 'htmx-run-history' %}?page={{ page|add:'1' }}"
+        hx-target="#run-history" hx-swap="innerHTML"
+        class="hover:text-neutral-200 transition"
+      >Next &rarr;</button>
+    {% else %}
+      <span class="opacity-30">Next &rarr;</span>
+    {% endif %}
+  </div>
+  {% endif %}
 </div>
