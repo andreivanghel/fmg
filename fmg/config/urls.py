@@ -22,6 +22,7 @@ from fmg.presentation.django.views import health_check
 
 urlpatterns = [
     path("health/", health_check),
+    path("", include("fmg.presentation.django.htmx_urls")),
     path("admin/", admin.site.urls),
     path("api/v1/", include("fmg.presentation.django.urls")),
 ]

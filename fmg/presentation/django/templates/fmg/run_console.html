@@ -1,0 +1,60 @@
+{% extends "fmg/base.html" %}
+{% block content %}
+<style>
+  form.htmx-request #run-button {
+    background-color: #10b981;
+    color: #f8fafc;
+  }
+  form.htmx-request .run-label-idle { display: none; }
+  .run-label-active { display: none; }
+  form.htmx-request .run-label-active { display: inline; }
+</style>
+<div class="max-w-3xl mx-auto p-6 md:p-10">
+  <header class="mb-10">
+    <div class="flex items-center gap-2 text-sm text-neutral-500 mb-1">
+      <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+      FMG · Run Console
+    </div>
+    <h1 class="text-2xl font-semibold tracking-tight">Financial Model Governance</h1>
+  </header>
+
+  <form
+    class="border border-neutral-800 rounded-xl bg-neutral-900 p-6 mb-6"
+    hx-post="{% url 'htmx-trigger-run' %}"
+    hx-target="#run-status"
+    hx-swap="innerHTML"
+  >
+    {% csrf_token %}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div>
+        <label class="block text-xs text-neutral-500 mb-1.5">Model</label>
+        <select name="model_id" class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm font-mono">
+          <option value="1">PortfolioValueAtRisk (#1)</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-neutral-500 mb-1.5">Version</label>
+        <select name="model_version_id" class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm font-mono">
+          <option value="1">v1</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-neutral-500 mb-1.5">Parameter set</label>
+        <select name="parameter_version_id" class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm font-mono">
+          <option value="1">Default (#1)</option>
+        </select>
+      </div>
+    </div>
+    <button type="submit" id="run-button" class="w-full bg-neutral-100 text-neutral-900 rounded-lg py-2.5 text-sm font-medium hover:bg-white transition-colors duration-200">
+      <span class="run-label-idle">Run model</span>
+      <span class="run-label-active">Running…</span>
+    </button>
+  </form>
+
+  <div id="run-status" class="mb-6"></div>
+
+  <div id="run-detail" class="mb-6"></div>
+
+  <div id="run-history" hx-get="{% url 'htmx-run-history' %}" hx-trigger="load" hx-swap="innerHTML"></div>
+</div>
+{% endblock %}

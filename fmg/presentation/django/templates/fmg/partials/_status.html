@@ -1,0 +1,44 @@
+<div class="border border-neutral-800 rounded-xl bg-neutral-900 p-6"
+  {% if not is_terminal %}
+    hx-get="{% url 'htmx-run-status' run.run_id %}"
+    hx-trigger="every 400ms"
+    hx-swap="outerHTML"
+  {% endif %}
+>
+  <div class="flex items-center justify-between mb-4">
+    <span class="text-xs text-neutral-500">Run</span>
+    <span class="text-xs font-mono text-neutral-400">#{{ run.run_id }} · {{ run.status }}</span>
+  </div>
+
+  <div class="flex items-center">
+    {% for stage in stages %}
+      <div class="flex flex-col items-center gap-2">
+        <div class="w-2.5 h-2.5 rounded-full
+          {% if stage.lit %}{% if is_terminal and not is_success %}bg-red-500{% else %}bg-emerald-500{% endif %}
+          {% else %}bg-neutral-700{% endif %}"></div>
+        <span class="text-xs {% if stage.lit %}text-neutral-300{% else %}text-neutral-600{% endif %}">{{ stage.label }}</span>
+      </div>
+      {% if not forloop.last %}
+        <div class="flex-1 h-px mx-2 mb-4 {% if stage.lit %}bg-emerald-500{% else %}bg-neutral-800{% endif %}"></div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% if run.check_results %}
+  <div class="mt-4 pt-4 border-t border-neutral-800 flex flex-wrap gap-2">
+    {% for check in run.check_results %}
+      <span class="text-xs font-mono px-2 py-1 rounded border
+        {% if check.outcome == 'passed' %}bg-emerald-950 text-emerald-400 border-emerald-900
+        {% elif check.outcome == 'warning' %}bg-amber-950 text-amber-400 border-amber-900
+        {% else %}bg-red-950 text-red-400 border-red-900{% endif %}">
+        {{ check.check_name }}
+      </span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if is_terminal %}
+    {# Fires once, invisible: keeps the history list in sync without extra JS #}
+    <div hx-get="{% url 'htmx-run-history' %}" hx-trigger="load" hx-target="#run-history" hx-swap="innerHTML" class="hidden"></div>
+  {% endif %}
+</div>

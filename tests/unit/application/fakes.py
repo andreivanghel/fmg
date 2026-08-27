@@ -91,6 +91,15 @@ class InMemoryRunRepository(IRunRepository):
         self._run = run
         return generated_id
 
+    @override
+    def list_runs(self, limit: int = 20, offset: int = 0) -> list[ModelRun]:
+        assert self._run is not None, "InMemoryRunRepository: no run stored in memory"
+        return [self._run]  # Return a list with the single run for testing purposes
+
+    @override
+    def count_runs(self) -> int:
+        return 1 if self._run is not None else 0
+
 
 class FakeTaskDispatcher(ITaskDispatcher):
     def __init__(self):
