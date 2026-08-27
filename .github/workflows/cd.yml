@@ -30,7 +30,9 @@ jobs:
 
           ssh -i ~/.ssh/deploy_key "$VM_USER@$VM_HOST" << 'EOF'
             cd /var/www/fmg/
-            git pull origin main
+            git fetch origin main
+            git checkout -B main origin/main
+            git reset --hard origin/main
 
-            sudo docker compose -f docker-compose.prod.yml up -d --build --wait
+            sudo docker compose -f /var/www/fmg/docker-compose.prod.yml up -d --build --wait
           EOF
