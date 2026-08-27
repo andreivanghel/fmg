@@ -29,7 +29,7 @@ jobs:
           ssh-keyscan -H "$VM_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
           ssh -i ~/.ssh/deploy_key "$VM_USER@$VM_HOST" << 'EOF'
-            cd /home/ubuntu/fmg/
+            cd /var/www/fmg/
             git pull origin main
 
             sudo docker compose -f docker-compose.prod.yml up -d --build --wait
