@@ -59,6 +59,48 @@ class DjangoRunRepository(IRunRepository):
         # let other exceptions propagate: they are likely programming errors that should be fixed in the code, not handled at runtime.
 
     @override
+    def list_runs(self, limit: int = 20, offset: int = 0) -> list[ModelRun]:
+        """
+        Fetch the most recent runs, newest first.
+
+        Args:
+            limit: Max number of runs to return.
+            offset: Number of runs to skip (for pagination).
+
+        Returns:
+            A list of ModelRun instances, ordered by created_at descending.
+
+        Raises:
+            DatabaseError: If a database error is encountered while listing runs.
+        """
+        try:
+            orm_objs = ModelRunORM.objects.order_by("-created_at")[offset : offset + limit]
+            return [self._to_entity(o) for o in orm_objs]
+
+        except OperationalError as e:
+            raise DatabaseError(f"Database error while listing runs: {e}") from e
+
+        except ProgrammingError as e:
+            raise DatabaseError(f"SQL error while listing runs: {e}") from e
+
+    @override
+    def count_runs(self) -> int:
+        """
+        Count the total number of persisted runs.
+
+        Returns:
+            Total run count.
+
+        Raises:
+            DatabaseError: If a database error is encountered while counting runs.
+        """
+        try:
+            return ModelRunORM.objects.count()
+
+        except OperationalError as e:
+            raise DatabaseError(f"Database error while counting runs: {e}") from e
+
+    @override
     def create(self, run: ModelRun) -> int:
         """
         Persist a new run via INSERT.

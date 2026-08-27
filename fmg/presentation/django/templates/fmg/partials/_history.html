@@ -1,0 +1,55 @@
+<div class="border border-neutral-800 rounded-xl bg-neutral-900 overflow-hidden">
+  <div class="px-6 py-3 border-b border-neutral-800 flex items-center justify-between text-xs text-neutral-500">
+    <span>Run history</span>
+    <span>{{ total }} total</span>
+  </div>
+  <div>
+    {% for run in runs %}
+      <button
+        hx-get="{% url 'htmx-run-detail' run.run_id %}"
+        hx-target="#run-detail"
+        hx-swap="innerHTML"
+        class="w-full flex items-center justify-between px-6 py-3 border-b border-neutral-800 last:border-b-0 hover:bg-neutral-800 transition text-left"
+      >
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-mono px-1.5 py-0.5 rounded border
+            {% if run.status == 'completed' %}bg-emerald-950 text-emerald-400 border-emerald-900
+            {% elif run.status == 'pending' or run.status == 'running' or run.status == 'outputs_generated' %}bg-amber-950 text-amber-400 border-amber-900
+            {% else %}bg-red-950 text-red-400 border-red-900{% endif %}">
+            {{ run.status }}
+          </span>
+          <span class="text-sm font-mono text-neutral-300">#{{ run.run_id }}</span>
+        </div>
+        <span class="text-xs text-neutral-500">{{ run.created_at|date:"Y-m-d H:i:s" }}</span>
+      </button>
+    {% empty %}
+      <div class="px-6 py-6 text-sm text-neutral-500 text-center">No runs yet.</div>
+    {% endfor %}
+  </div>
+
+  {% if total_pages > 1 %}
+  <div class="px-6 py-3 border-t border-neutral-800 flex items-center justify-between text-xs text-neutral-500">
+    {% if has_prev %}
+      <button
+        hx-get="{% url 'htmx-run-history' %}?page={{ page|add:'-1' }}"
+        hx-target="#run-history" hx-swap="innerHTML"
+        class="hover:text-neutral-200 transition"
+      >&larr; Prev</button>
+    {% else %}
+      <span class="opacity-30">&larr; Prev</span>
+    {% endif %}
+
+    <span>Page {{ page }} of {{ total_pages }}</span>
+
+    {% if has_next %}
+      <button
+        hx-get="{% url 'htmx-run-history' %}?page={{ page|add:'1' }}"
+        hx-target="#run-history" hx-swap="innerHTML"
+        class="hover:text-neutral-200 transition"
+      >Next &rarr;</button>
+    {% else %}
+      <span class="opacity-30">Next &rarr;</span>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

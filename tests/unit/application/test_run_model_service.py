@@ -1,4 +1,3 @@
-# tests/unit/application/test_run_model_service.py
 from datetime import UTC, datetime
 
 from fmg.application.factories.model_factory import ModelFactory
